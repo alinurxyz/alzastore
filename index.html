@@ -675,7 +675,7 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBteGt5emdzYXV6eGVpZGJqdWhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjMwNDAsImV4cCI6MjA3NjY5OTA0MH0.oXlVN7F-CXN6zDCuOOr8u2N6efIo9GWd9JyJ5O0_fyA'; 
         
         let supabase;
-        let currentUser;
+        // DIHAPUS: currentUser tidak lagi digunakan
 
         document.addEventListener('DOMContentLoaded', () => {
             // === INISIALISASI SUPABASE CLIENT ===
@@ -1062,12 +1062,12 @@
             });
 
             
-            // === BARU: FUNGSI INISIALISASI SUPABASE ===
+            // === BARU: FUNGSI INISIALISASI SUPABASE (VERSI PUBLIK) ===
             
             const loadDataFromSupabase = async () => {
-                if (!currentUser) {
-                    console.error("Tidak ada pengguna, gagal memuat data.");
-                    showAlert("Sesi pengguna tidak ditemukan. Coba refresh.", "error");
+                if (!supabase) { // Cek supabase
+                    console.error("Supabase client not initialized.");
+                    showAlert("Supabase client belum siap. Coba refresh.", "error");
                     return;
                 }
             
@@ -1076,7 +1076,7 @@
                 let { data: productsData, error: productsError } = await supabase
                     .from('products')
                     .select('*')
-                    .eq('user_id', currentUser.id)
+                    // DIHAPUS: .eq('user_id', currentUser.id)
                     .order('created_at', { ascending: false }); // Terbaru di atas
             
                 if (productsError) {
@@ -1105,7 +1105,7 @@
                             products ( name ) 
                         )
                     `)
-                    .eq('user_id', currentUser.id)
+                    // DIHAPUS: .eq('user_id', currentUser.id)
                     .order('created_at', { ascending: false }); // Terbaru di atas
 
                 if (transactionsError) {
@@ -1123,7 +1123,7 @@
                     totalProfit: trx.total_profit,
                     items: trx.transaction_items.map(item => ({
                         id: item.product_id,
-                        name: item.products.name, // Ambil nama dari relasi
+                        name: item.products ? item.products.name : '[Produk Dihapus]', // Handle jika produk terhapus
                         quantity: item.quantity,
                         sellPrice: item.sell_price_at_sale,
                         buyPrice: item.buy_price_at_sale,
@@ -1137,44 +1137,11 @@
             const initializeApp = async () => {
                 loadTheme(); // Muat tema dari localStorage dulu
                 
-                // 1. Autentikasi (Anonymous)
-                setLoading(true, "Autentikasi...");
-
-                // --- LOGIKA DIPERBAIKI (29 Okt 2025) ---
-                // Cek dulu apakah sudah ada sesi yang tersimpan
-                let { data: { session } } = await supabase.auth.getSession();
-                
-                let userToSet = session?.user;
-
-                // Jika tidak ada sesi (pengguna baru), baru buat pengguna anonim
-                if (!session) {
-                    const { data: { user: newUser }, error: authError } = await supabase.auth.signInAnonymously();
-                    
-                    if (authError) {
-                        console.error("Error signing in anonymously:", authError.message);
-                        setLoading(false);
-                        const authErrorMessage = authError.message.includes("Anonymous sign-ins are disabled")
-                            ? "Anonymous sign-ins are disabled. Harap aktifkan di Pengaturan Supabase Anda (Authentication > Providers > Anonymous)."
-                            : authError.message;
-                        loadingError.textContent = "Gagal melakukan autentikasi: " + authErrorMessage;
-                        showAlert("Gagal melakukan autentikasi: " + authErrorMessage, 'error');
-                        return;
-                    }
-                    userToSet = newUser;
-                }
-                
-                // Set pengguna saat ini
-                currentUser = userToSet;
-
-                if (!currentUser) {
-                     showAlert("Gagal mendapatkan data pengguna. Coba refresh.", 'error');
-                     setLoading(false);
-                     return;
-                }
-                // --- AKHIR PERBAIKAN ---
+                // 1. Autentikasi (DIHAPUS)
+                // Kita tidak perlu login lagi, langsung muat data
+                setLoading(true, "Menghubungkan ke database...");
 
                 // 2. Muat Data Awal
-                setLoading(true, "Memuat data toko...");
                 await loadDataFromSupabase();
                 
                 // 3. Selesai Loading & Inisialisasi
@@ -1262,7 +1229,7 @@
                         .from('products')
                         .update({ name, buy_price, sell_price })
                         .eq('id', id)
-                        .eq('user_id', currentUser.id) // Pastikan hanya bisa update milik sendiri
+                        // DIHAPUS: .eq('user_id', currentUser.id)
                         .select()
                         .single(); // Ambil data yang diupdate
 
@@ -1286,8 +1253,8 @@
                             name,
                             buy_price,
                             sell_price,
-                            stock,
-                            user_id: currentUser.id // WAJIB ada user_id
+                            stock
+                            // DIHAPUS: user_id: currentUser.id
                         })
                         .select()
                         .single(); // Ambil data yang baru dibuat
@@ -1327,7 +1294,7 @@
                     .from('products')
                     .update({ stock: newStock })
                     .eq('id', id)
-                    .eq('user_id', currentUser.id)
+                    // DIHAPUS: .eq('user_id', currentUser.id)
                     .select()
                     .single();
 
@@ -1352,8 +1319,8 @@
                 const { error } = await supabase
                     .from('products')
                     .delete()
-                    .eq('id', id)
-                    .eq('user_id', currentUser.id);
+                    .eq('id', id);
+                    // DIHAPUS: .eq('user_id', currentUser.id);
 
                 if (error) {
                     console.error("Error deleting product:", error);
@@ -1530,7 +1497,7 @@
                     transactionItemsToInsert.push({
                         // transaction_id akan diisi nanti
                         product_id: item.id,
-                        user_id: currentUser.id,
+                        // DIHAPUS: user_id: currentUser.id,
                         quantity: item.quantity,
                         sell_price_at_sale: item.sellPrice,
                         buy_price_at_sale: item.buyPrice
@@ -1545,7 +1512,7 @@
                 const { data: trxData, error: trxError } = await supabase
                     .from('transactions')
                     .insert({
-                        user_id: currentUser.id,
+                        // DIHAPUS: user_id: currentUser.id,
                         total_sale: totalSale,
                         total_profit: totalProfit
                     })
@@ -1591,8 +1558,8 @@
                     const { error: stockError } = await supabase
                         .from('products')
                         .update({ stock: update.newStock })
-                        .eq('id', update.id)
-                        .eq('user_id', currentUser.id);
+                        .eq('id', update.id);
+                        // DIHAPUS: .eq('user_id', currentUser.id);
                         
                     if (stockError) updateErrors.push(stockError.message);
                     
