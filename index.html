@@ -681,6 +681,17 @@
       document.getElementById('kasirClear').addEventListener('click', () => formKasir.reset());
       document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
       document.getElementById('laporanFilterBtn').addEventListener('click', loadLaporan); // Filter laporan
+      const laporanSearchInput = document.getElementById('laporanSearch');
+      document.getElementById('laporanSearchBtn').addEventListener('click', renderLaporanLokal);
+      laporanSearchInput.addEventListener('keyup', (e) => {
+          if (e.key === 'Enter') {
+              renderLaporanLokal();
+          }
+          // Optional: Hapus filter jika search dikosongkan
+          if (laporanSearchInput.value === '') {
+              renderLaporanLokal();
+          }
+      });
       
       // Wire modal buttons
       document.getElementById('closeModalBtn').addEventListener('click', () => closeReceiptModal(true)); // Ttp struk & refresh
@@ -1777,6 +1788,7 @@ async function loadLaporan() {
   </script>
 </body>
 </html>
+
 
 
 
