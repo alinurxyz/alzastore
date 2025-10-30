@@ -1,262 +1,244 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ALZA STORE</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #f5f7fa;
-      margin: 0;
-      padding: 0;
-    }
-
-    header {
-      background: #0078ff;
-      color: white;
-      padding: 15px 25px;
-      text-align: center;
-      font-size: 1.6em;
-      font-weight: 600;
-      letter-spacing: 1px;
-    }
-
-    main {
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    h2 {
-      color: #333;
-      margin-top: 20px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      width: 90%;
-      max-width: 800px;
-      padding: 20px;
-      margin-bottom: 25px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    th, td {
-      text-align: left;
-      padding: 8px;
-      border-bottom: 1px solid #ddd;
-    }
-
-    th {
-      background: #0078ff;
-      color: white;
-    }
-
-    input, button {
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      margin: 5px;
-    }
-
-    button {
-      background: #0078ff;
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      background: #005fcc;
-    }
-
-    #loading {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(255,255,255,0.9);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 1.3em;
-      color: #0078ff;
-      z-index: 999;
-    }
-  </style>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-  <header>🛍️ ALZA STORE</header>
+<body class="bg-gray-100 text-gray-900 font-sans">
+  <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 text-lg hidden z-50">
+    Menghubungkan ke Database...
+  </div>
 
-  <div id="loading">Menghubungkan ke Database...</div>
-
-  <main>
-    <!-- DASHBOARD -->
-    <div class="card" id="dashboard">
-      <h2>📊 Dashboard</h2>
-      <p>Total Produk: <span id="totalProduk">0</span></p>
-      <p>Total Penjualan: Rp<span id="totalPenjualan">0</span></p>
-      <p>Total Keuntungan: Rp<span id="totalKeuntungan">0</span></p>
+  <header class="bg-blue-600 text-white shadow">
+    <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
+      <h1 class="text-2xl font-bold">🛒 ALZA STORE</h1>
+      <nav class="space-x-4">
+        <button class="nav-btn font-medium" data-section="dashboard">Dashboard</button>
+        <button class="nav-btn font-medium" data-section="stok">Manajemen Stok</button>
+        <button class="nav-btn font-medium" data-section="kasir">Kasir</button>
+        <button class="nav-btn font-medium" data-section="laporan">Laporan</button>
+      </nav>
     </div>
+  </header>
 
-    <!-- STOK BARANG -->
-    <div class="card">
-      <h2>📦 Data Stok Barang</h2>
-      <form id="formProduk">
-        <input type="text" id="nama" placeholder="Nama Produk" required>
-        <input type="number" id="modal" placeholder="Modal" required>
-        <input type="number" id="harga_jual" placeholder="Harga Jual" required>
-        <input type="number" id="stok" placeholder="Stok" required>
-        <button type="submit">Tambah Produk</button>
+  <main class="max-w-6xl mx-auto p-4 space-y-6">
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="hidden">
+      <h2 class="text-xl font-semibold mb-2">📊 Dashboard Penjualan</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded shadow text-center">
+          <p class="font-medium text-gray-600">Total Produk</p>
+          <p id="totalProduk" class="text-2xl font-bold">0</p>
+        </div>
+        <div class="bg-white p-4 rounded shadow text-center">
+          <p class="font-medium text-gray-600">Total Penjualan</p>
+          <p id="totalPenjualan" class="text-2xl font-bold">Rp 0</p>
+        </div>
+        <div class="bg-white p-4 rounded shadow text-center">
+          <p class="font-medium text-gray-600">Total Keuntungan</p>
+          <p id="totalKeuntungan" class="text-2xl font-bold">Rp 0</p>
+        </div>
+        <div class="bg-white p-4 rounded shadow text-center">
+          <p class="font-medium text-gray-600">Transaksi Hari Ini</p>
+          <p id="transaksiHarian" class="text-2xl font-bold">0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- MANAJEMEN STOK -->
+    <section id="stok" class="hidden">
+      <h2 class="text-xl font-semibold mb-2">📦 Manajemen Stok Barang</h2>
+      <form id="productForm" class="grid grid-cols-1 md:grid-cols-6 gap-2 mb-4">
+        <input id="sku" placeholder="SKU" class="border p-2 rounded" required>
+        <input id="nama" placeholder="Nama Produk" class="border p-2 rounded" required>
+        <input id="modal" type="number" placeholder="Modal" class="border p-2 rounded" required>
+        <input id="harga_jual" type="number" placeholder="Harga Jual" class="border p-2 rounded" required>
+        <input id="stokValue" type="number" placeholder="Stok" class="border p-2 rounded" required>
+        <button class="bg-blue-600 text-white py-2 rounded">Tambah</button>
       </form>
 
-      <table>
+      <table class="min-w-full bg-white border rounded shadow">
         <thead>
-          <tr>
-            <th>Nama</th>
-            <th>Modal</th>
-            <th>Harga Jual</th>
-            <th>Stok</th>
-            <th>Aksi</th>
+          <tr class="bg-gray-200 text-left">
+            <th class="p-2">SKU</th>
+            <th class="p-2">Nama</th>
+            <th class="p-2">Modal</th>
+            <th class="p-2">Harga</th>
+            <th class="p-2">Stok</th>
+            <th class="p-2">Aksi</th>
           </tr>
         </thead>
-        <tbody id="tabelProduk"></tbody>
+        <tbody id="productTable"></tbody>
       </table>
-    </div>
+    </section>
 
-    <!-- LAPORAN PENJUALAN -->
-    <div class="card">
-      <h2>💰 Laporan Penjualan</h2>
-      <table>
+    <!-- KASIR -->
+    <section id="kasir" class="hidden">
+      <h2 class="text-xl font-semibold mb-2">💰 Kasir (POS)</h2>
+      <form id="kasirForm" class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+        <select id="produkSelect" class="border p-2 rounded"></select>
+        <input id="qty" type="number" placeholder="Jumlah" class="border p-2 rounded" required>
+        <button class="bg-green-600 text-white py-2 rounded">Proses</button>
+      </form>
+      <div id="kasirResult" class="text-lg font-medium text-green-700"></div>
+    </section>
+
+    <!-- LAPORAN -->
+    <section id="laporan" class="hidden">
+      <h2 class="text-xl font-semibold mb-2">📑 Laporan Penjualan</h2>
+      <table class="min-w-full bg-white border rounded shadow">
         <thead>
-          <tr>
-            <th>Produk</th>
-            <th>Qty</th>
-            <th>Total</th>
-            <th>Keuntungan</th>
-            <th>Tanggal</th>
+          <tr class="bg-gray-200 text-left">
+            <th class="p-2">Produk</th>
+            <th class="p-2">Qty</th>
+            <th class="p-2">Total</th>
+            <th class="p-2">Keuntungan</th>
+            <th class="p-2">Tanggal</th>
           </tr>
         </thead>
-        <tbody id="tabelTransaksi"></tbody>
+        <tbody id="laporanTable"></tbody>
       </table>
-    </div>
+    </section>
   </main>
 
   <script>
-    const SUPABASE_URL = "https://pmxkyzgsauzxeidbjuhd.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBteGt5emdzYXV6eGVpZGJqdWhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjMwNDAsImV4cCI6MjA3NjY5OTA0MH0.oXlVN7F-CXN6zDCuOOr8u2N6efIo9GWd9JyJ5O0_fyA";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseUrl = 'https://pmxkyzgsauzxeidbjuhd.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBteGt5emdzYXV6eGVpZGJqdWhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjMwNDAsImV4cCI6MjA3NjY5OTA0MH0.oXlVN7F-CXN6zDCuOOr8u2N6efIo9GWd9JyJ5O0_fyA';
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
     const loading = document.getElementById('loading');
-    const tabelProduk = document.getElementById('tabelProduk');
-    const tabelTransaksi = document.getElementById('tabelTransaksi');
+    const sections = document.querySelectorAll('main section');
 
     document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        await loadProduk();
-        await loadTransaksi();
-        await updateDashboard();
-        loading.style.display = 'none';
-      } catch (e) {
-        loading.textContent = 'Gagal menghubungkan ke database.';
-      }
+      loading.classList.remove('hidden');
+      await loadProducts();
+      await updateDashboard();
+      await loadProductOptions();
+      await loadLaporan();
+      loading.classList.add('hidden');
+      showSection('dashboard');
     });
 
-    // === LOAD PRODUK ===
-    async function loadProduk() {
-      const { data, error } = await supabase.from('produk').select('*').order('id', { ascending: true });
-      if (error) {
-        console.error(error);
-        return;
-      }
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => showSection(btn.dataset.section));
+    });
 
-      tabelProduk.innerHTML = '';
+    function showSection(id) {
+      sections.forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    // === PRODUK ===
+    async function loadProducts() {
+      const { data, error } = await supabaseClient.from('produk').select('*').order('id');
+      if (error) console.error(error);
+      const tbody = document.getElementById('productTable');
+      tbody.innerHTML = '';
       data.forEach(p => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${p.nama}</td>
-          <td>Rp${p.modal}</td>
-          <td>Rp${p.harga_jual}</td>
-          <td>${p.stok}</td>
-          <td><button onclick="hapusProduk(${p.id})">Hapus</button></td>
-        `;
-        tabelProduk.appendChild(tr);
+          <td class='p-2'>${p.sku || '-'}</td>
+          <td class='p-2'>${p.nama}</td>
+          <td class='p-2'>Rp ${Number(p.modal).toLocaleString('id-ID')}</td>
+          <td class='p-2'>Rp ${Number(p.harga_jual).toLocaleString('id-ID')}</td>
+          <td class='p-2'>${p.stok}</td>
+          <td class='p-2'>
+            <button class='bg-red-600 text-white px-2 py-1 rounded' onclick='deleteProduct(${p.id})'>Hapus</button>
+          </td>`;
+        tbody.appendChild(tr);
       });
     }
 
-    // === TAMBAH PRODUK ===
-    document.getElementById('formProduk').addEventListener('submit', async (e) => {
+    document.getElementById('productForm').addEventListener('submit', async e => {
       e.preventDefault();
+      const sku = sku.value;
       const nama = document.getElementById('nama').value;
       const modal = parseFloat(document.getElementById('modal').value);
       const harga_jual = parseFloat(document.getElementById('harga_jual').value);
-      const stok = parseInt(document.getElementById('stok').value);
-
-      const { error } = await supabase.from('produk').insert([{ nama, modal, harga_jual, stok }]);
-      if (error) {
-        alert("Gagal tambah produk: " + error.message);
-        return;
-      }
-
+      const stok = parseInt(document.getElementById('stokValue').value);
+      const { error } = await supabaseClient.from('produk').insert([{ sku, nama, modal, harga_jual, stok }]);
+      if (error) return alert('Gagal tambah produk: ' + error.message);
       e.target.reset();
-      await loadProduk();
+      await loadProducts();
       await updateDashboard();
+      await loadProductOptions();
     });
 
-    // === HAPUS PRODUK ===
-    async function hapusProduk(id) {
+    async function deleteProduct(id) {
       if (!confirm('Yakin hapus produk ini?')) return;
-      const { error } = await supabase.from('produk').delete().eq('id', id);
-      if (error) alert("Gagal hapus produk: " + error.message);
-      await loadProduk();
-      await updateDashboard();
+      const { error } = await supabaseClient.from('produk').delete().eq('id', id);
+      if (error) alert(error.message);
+      else {
+        await loadProducts();
+        await updateDashboard();
+        await loadProductOptions();
+      }
     }
 
-    // === LOAD TRANSAKSI ===
-    async function loadTransaksi() {
-      const { data, error } = await supabase.from('transaksi').select('*, produk(nama)').order('created_at', { ascending: false });
-      if (error) {
-        console.error(error);
-        return;
-      }
+    // === KASIR ===
+    async function loadProductOptions() {
+      const { data } = await supabaseClient.from('produk').select('*');
+      const select = document.getElementById('produkSelect');
+      select.innerHTML = data.map(p => `<option value="${p.id}">${p.nama} (Rp ${p.harga_jual})</option>`).join('');
+    }
 
-      tabelTransaksi.innerHTML = '';
+    document.getElementById('kasirForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const produk_id = parseInt(document.getElementById('produkSelect').value);
+      const qty = parseInt(document.getElementById('qty').value);
+      const { data: produk } = await supabaseClient.from('produk').select('*').eq('id', produk_id).single();
+      if (!produk || qty > produk.stok) return alert('Stok tidak cukup!');
+
+      const total = produk.harga_jual * qty;
+      const keuntungan = (produk.harga_jual - produk.modal) * qty;
+
+      const { error } = await supabaseClient.from('transaksi').insert([{ produk_id, qty, total, keuntungan }]);
+      if (error) return alert('Gagal input transaksi: ' + error.message);
+
+      await supabaseClient.from('produk').update({ stok: produk.stok - qty }).eq('id', produk_id);
+
+      document.getElementById('kasirResult').textContent = `✅ Transaksi sukses! Total: Rp ${total.toLocaleString('id-ID')}`;
+      e.target.reset();
+      await updateDashboard();
+      await loadProducts();
+      await loadLaporan();
+    });
+
+    // === LAPORAN ===
+    async function loadLaporan() {
+      const { data, error } = await supabaseClient.from('transaksi').select('*, produk:produk_id(nama)').order('id', { ascending: false });
+      if (error) console.error(error);
+      const tbody = document.getElementById('laporanTable');
+      tbody.innerHTML = '';
       data.forEach(t => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${t.produk?.nama || '-'}</td>
-          <td>${t.qty}</td>
-          <td>Rp${t.total}</td>
-          <td>Rp${t.keuntungan}</td>
-          <td>${new Date(t.created_at).toLocaleString()}</td>
-        `;
-        tabelTransaksi.appendChild(tr);
+          <td class='p-2'>${t.produk.nama}</td>
+          <td class='p-2'>${t.qty}</td>
+          <td class='p-2'>Rp ${t.total.toLocaleString('id-ID')}</td>
+          <td class='p-2'>Rp ${t.keuntungan.toLocaleString('id-ID')}</td>
+          <td class='p-2'>${new Date(t.created_at).toLocaleString('id-ID')}</td>`;
+        tbody.appendChild(tr);
       });
     }
 
     // === DASHBOARD ===
     async function updateDashboard() {
-      const { data: produk } = await supabase.from('produk').select('*');
-      const { data: transaksi } = await supabase.from('transaksi').select('*');
-
+      const { data: produk } = await supabaseClient.from('produk').select('*');
+      const { data: transaksi } = await supabaseClient.from('transaksi').select('*');
       const totalProduk = produk?.length || 0;
-      const totalPenjualan = transaksi?.reduce((a, b) => a + Number(b.total), 0) || 0;
-      const totalKeuntungan = transaksi?.reduce((a, b) => a + Number(b.keuntungan), 0) || 0;
+      const totalPenjualan = transaksi?.reduce((sum, t) => sum + t.total, 0) || 0;
+      const totalKeuntungan = transaksi?.reduce((sum, t) => sum + t.keuntungan, 0) || 0;
+      const today = new Date().toISOString().slice(0, 10);
+      const transaksiHarian = transaksi?.filter(t => t.created_at.startsWith(today)).length || 0;
 
       document.getElementById('totalProduk').textContent = totalProduk;
-      document.getElementById('totalPenjualan').textContent = totalPenjualan.toLocaleString();
-      document.getElementById('totalKeuntungan').textContent = totalKeuntungan.toLocaleString();
+      document.getElementById('totalPenjualan').textContent = 'Rp ' + totalPenjualan.toLocaleString('id-ID');
+      document.getElementById('totalKeuntungan').textContent = 'Rp ' + totalKeuntungan.toLocaleString('id-ID');
+      document.getElementById('transaksiHarian').textContent = transaksiHarian;
     }
   </script>
 </body>
