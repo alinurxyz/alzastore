@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ALZA STORE - Futuristic</title>
+  <title>ALZA STORE - Grow Your Bussiness</title>
 
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -81,6 +81,95 @@
     }
   </style>
 
+  /* ===== Responsive Table (Card View) untuk Laporan ===== */
+    @media (max-width: 767px) { /* md breakpoint (di bawah 768px) */
+      /* Sembunyikan header tabel, kita akan pakai label */
+      #laporan thead {
+        display: none;
+      }
+      
+      /* Hapus pembagi-y bawaan di mobile */
+      #laporanTable {
+        divide-y: 0;
+      }
+      
+      /* Ubah <tr> (baris) jadi card */
+      #laporanTable tr {
+        display: block;
+        border-width: 1px;
+        border-color: #e2e8f0; /* border-slate-200 */
+        border-radius: 0.75rem; /* rounded-xl */
+        background-color: white;
+        margin-bottom: 1rem; /* mb-4 */
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); /* shadow */
+        overflow: hidden; /* Agar rounded corner rapi */
+      }
+      .dark #laporanTable tr {
+        background-color: #1e293b; /* dark:bg-slate-800 */
+        border-color: #334155; /* dark:border-slate-700 */
+      }
+
+      /* Ubah <td> (sel) jadi baris di dalam card */
+      #laporanTable td {
+        display: block;
+        width: 100%;
+        text-align: right; /* Konten di kanan */
+        padding: 0.75rem 1rem; /* p-3 + p-4 */
+        border-bottom: 1px solid #f1f5f9; /* border-slate-100 */
+        position: relative;
+        padding-left: 45%; /* Sediakan ruang untuk label */
+      }
+      .dark #laporanTable td {
+        border-bottom-color: #334155; /* dark:border-slate-700 */
+      }
+      #laporanTable tr td:last-child {
+        border-bottom: 0; /* Hapus border di item terakhir */
+      }
+
+      /* Buat label dari atribut data-label */
+      #laporanTable td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 1rem;
+        text-align: left;
+        font-weight: 600; /* font-semibold */
+        color: #475569; /* text-slate-600 */
+        white-space: nowrap;
+      }
+      .dark #laporanTable td:before {
+        color: #cbd5e1; /* dark:text-slate-300 */
+      }
+      
+      /* --- Pengecualian Styling --- */
+      
+      /* Kolom Tanggal (Jadikan header card) */
+      #laporanTable td[data-label="Tanggal"] {
+        background-color: #f8fafc; /* bg-slate-50 */
+        font-weight: 600;
+        text-align: left;
+        padding-left: 1rem;
+      }
+      .dark #laporanTable td[data-label="Tanggal"] {
+        background-color: #334155; /* dark:bg-slate-700 */
+      }
+      #laporanTable td[data-label="Tanggal"]:before {
+        display: none; /* Sembunyikan label 'Tanggal' */
+      }
+      
+      /* Kolom Aksi (Tombol) */
+      #laporanTable td[data-label="Aksi"] {
+        padding-left: 1rem;
+        text-align: center;
+        background-color: #f8fafc; /* bg-slate-50 */
+      }
+      .dark #laporanTable td[data-label="Aksi"] {
+        background-color: #1e293b; /* dark:bg-slate-800 */
+      }
+      #laporanTable td[data-label="Aksi"]:before {
+        display: none; /* Sembunyikan label 'Aksi' */
+      }
+    }
+  
   <script>
     // Konfigurasi Tailwind untuk Dark Mode
     tailwind.config = {
@@ -121,12 +210,12 @@
         <div id="receiptContent" class="bg-white dark:bg-slate-800 text-sm p-4 rounded-md">
           <div class="text-center mb-4">
             <h4 class="text-xl font-bold">ALZA STORE</h4>
-            <p class="text-xs text-slate-600 dark:text-slate-400">Jl. Merdeka No. 123, Kota Bahagia</p>
+            <p class="text-xs text-slate-600 dark:text-slate-400">Sri Menanti Kotabumi Utara</p>
           </div>
           <div class="border-t border-b border-dashed border-slate-300 dark:border-slate-600 py-2 mb-2">
             <div class="flex justify-between">
               <span id="receiptDate" class="text-xs">2024-10-30 12:30:00</span>
-              <span class="text-xs">Kasir: Admin</span>
+              <span class="text-xs">Kasir: Hanisa Zahra A.A</span>
             </div>
           </div>
           <table class="w-full mb-2">
@@ -427,12 +516,11 @@
              </button>
           </div>
           
-          <button id="exportExcelBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 shadow-md transition-all duration-200 flex items-center gap-2">
-            <i class="fa-solid fa-file-excel"></i> Ekspor ke Excel
-          </button>
-        </div>
-        <div class="overflowx-auto">
-          <table class="min-w-full text-sm">
+          <button id="exportExcelBtn" class="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 shadow-md transition-all duration-200 flex items-center gap-2">
+            <i class="fa-solid fa-file-excel"></i> Ekspor ke Excel
+          </button>
+        </div>
+        <div class="overflow-x-auto">           <table class="min-w-full text-sm">
             <thead class="bg-slate-100 dark:bg-slate-700">
               <tr>
                 <th class="p-3 text-left font-semibold">Tanggal</th>
@@ -1499,21 +1587,21 @@ button.type = 'button';
         globalLaporanCache = data || []; // Simpan di cache untuk ekspor
         
         laporanTable.innerHTML = globalLaporanCache.map(t => {
-          const name = t.produk?.nama || 'Produk Dihapus';
-          return `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
-              <td class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(t.created_at)}</td>
-              <td class="p-3">${escapeHtml(name)}</td>
-              <td class="p-3">${t.qty}</td>
-              <td class="p-3 font-medium">${formatRupiah(t.total)}</td>
-              <td class="p-3 font-medium text-green-600 dark:text-green-400">${formatRupiah(t.keuntungan)}</td>
-              <td class="p-3">
-                  <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-red-700 transition-all" onclick="hapusLaporan(${t.id})">
-                      <i class="fa-solid fa-trash"></i> Hapus
-                  </button>
-              </td>
-            </tr>`;
-        }).join('');
+          const name = t.produk?.nama || 'Produk Dihapus';
+          return `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
+              <td data-label="Tanggal" class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(t.created_at)}</td>
+              <td data-label="Produk" class="p-3">${escapeHtml(name)}</td>
+              <td data-label="Qty" class="p-3">${t.qty}</td>
+              <td data-label="Total" class="p-3 font-medium">${formatRupiah(t.total)}</td>
+              <td data-label="Keuntungan" class="p-3 font-medium text-green-600 dark:text-green-400">${formatRupiah(t.keuntungan)}</td>
+              <td data-label="Aksi" class="p-3">
+                  <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-red-700 transition-all" onclick="hapusLaporan(${t.id})">
+                      <i class="fa-solid fa-trash"></i> Hapus
+                  </button>
+              </td>
+            </tr>`;
+        }).join('');
       } catch (err) {
         console.error('loadLaporan err', err);
         laporanTable.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-red-500">Gagal memuat data laporan.</td></tr>`;
@@ -1717,6 +1805,7 @@ button.type = 'button';
   </script>
 </body>
 </html>
+
 
 
 
