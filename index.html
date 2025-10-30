@@ -413,36 +413,25 @@
     </section>
 
     <!-- ===== PAGE: LAPORAN ===== -->
-<section id="laporan" class="page">
-      <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg">
-<div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-          <h2 class="text-xl font-semibold">Laporan Penjualan</h2>
-          
-                    <div class="flex flex-col sm:flex-row items-center gap-4">
-            
-                        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-               <input type="date" id="laporanTglMulai" class="border p-2 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-               <input type="date" id="laporanTglSelesai" class="border p-2 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-               <button id="laporanFilterBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2">
-                  <i class="fa-solid fa-filter"></i> Filter
-               </button>
-            </div>
-            
-                        <div class="flex gap-2 w-full sm:w-auto">
-               <input type="search" id="laporanSearch" placeholder="Cari nama produk..." class="border p-2 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-               <button id="laporanSearchBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-all duration-200 flex items-center justify-center gap-2">
-                  <i class="fa-solid fa-search"></i> Cari
-      S      </button>
-            </div>
-            
-                        <button id="exportExcelBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 shadow-md transition-all duration-200 flex items-center gap-2">
-              <i class="fa-solid fa-file-excel"></i> Ekspor ke Excel
-            </button>
-            
-          </div>           
-        </div>
-        <div class="overflowx-auto">
+    <section id="laporan" class="page">
+      <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+          <h2 class="text-xl font-semibold">Laporan Penjualan</h2>
+          
+          <!-- Filter Tanggal Baru -->
+          <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+             <input type="date" id="laporanTglMulai" class="border p-2 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+             <input type="date" id="laporanTglSelesai" class="border p-2 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+             <button id="laporanFilterBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-filter"></i> Filter
+             </button>
+          </div>
+          
+          <button id="exportExcelBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 shadow-md transition-all duration-200 flex items-center gap-2">
+            <i class="fa-solid fa-file-excel"></i> Ekspor ke Excel
+          </button>
+        </div>
+        <div class="overflowx-auto">
           <table class="min-w-full text-sm">
             <thead class="bg-slate-100 dark:bg-slate-700">
               <tr>
@@ -686,17 +675,6 @@
       document.getElementById('kasirClear').addEventListener('click', () => formKasir.reset());
       document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
       document.getElementById('laporanFilterBtn').addEventListener('click', loadLaporan); // Filter laporan
-      const laporanSearchInput = document.getElementById('laporanSearch');
-      document.getElementById('laporanSearchBtn').addEventListener('click', renderLaporanLokal);
-      laporanSearchInput.addEventListener('keyup', (e) => {
-          if (e.key === 'Enter') {
-              renderLaporanLokal();
-          }
-          // Optional: Hapus filter jika search dikosongkan
-          if (laporanSearchInput.value === '') {
-              renderLaporanLokal();
-          }
-      });
       
       // Wire modal buttons
       document.getElementById('closeModalBtn').addEventListener('click', () => closeReceiptModal(true)); // Ttp struk & refresh
@@ -1489,112 +1467,57 @@ button.type = 'button';
         }
     }
 
+
     // ===========================
-    //  LAPORAN
-    // ===========================
+    //  LAPORAN
+    // ===========================
+    async function loadLaporan() {
+      try {
+        const tglMulai = document.getElementById('laporanTglMulai').value;
+        const tglSelesai = document.getElementById('laporanTglSelesai').value;
 
-    /**
-     * [BARU] Merender tabel laporan dari data di globalLaporanCache
-     * Fungsi ini juga menangani filter pencarian lokal.
-     */
-    function renderLaporanLokal() {
-        const searchTerm = document.getElementById('laporanSearch').value.toLowerCase();
+        let query = supabase
+          .from('transaksi')
+          .select('id, produk_id, qty, total, keuntungan, created_at, produk:produk_id(nama)');
+          
+        // Terapkan filter tanggal jika ada
+        if (tglMulai) {
+            query = query.gte('created_at', new Date(tglMulai).toISOString());
+        }
+        if (tglSelesai) {
+            // Tambahkan T23:59:59 agar mencakup seluruh hari
+            query = query.lte('created_at', new Date(tglSelesai + 'T23:59:59').toISOString());
+        }
+
+        const { data, error } = await query
+          .order('created_at', { ascending: false })
+          .limit(200); // Batasi 200 untuk tampilan
+          
+        if (error) throw error;
         
-        let dataToRender = globalLaporanCache;
-
-        // 1. Terapkan filter pencarian lokal jika ada
-        if (searchTerm) {
-            dataToRender = globalLaporanCache.filter(t => {
-                const namaProduk = t.produk?.nama || 'produk dihapus';
-                return namaProduk.toLowerCase().includes(searchTerm);
-            });
-        }
-
-        // 2. Render tabel
-        if (dataToRender.length === 0) {
-            // Tampilkan pesan berdasarkan apakah ada filter atau tidak
-            if (searchTerm) {
-                laporanTable.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="p-4 text-center text-slate-500 dark:text-slate-400">
-                            Tidak ada produk dengan nama "${escapeHtml(searchTerm)}" pada rentang tanggal ini.
-                        </td>
-                    </tr>`;
-            } else {
-                laporanTable.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="p-4 text-center text-slate-500 dark:text-slate-400">
-                            Tidak ada data transaksi untuk rentang tanggal yang dipilih.
-                        </td>
-                    </tr>`;
-            }
-        } else {
-            // Render data seperti biasa
-            laporanTable.innerHTML = dataToRender.map(t => {
-                const name = t.produk?.nama || 'Produk Dihapus';
-                return `
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
-                        <td class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(t.created_at)}</td>
-                        <td class="p-3">${escapeHtml(name)}</td>
-                        <td class="p-3">${t.qty}</td>
-                        <td class="p-3 font-medium">${formatRupiah(t.total)}</td>
-                        <td class="p-3 font-medium text-green-600 dark:text-green-400">${formatRupiah(t.keuntungan)}</td>
-                        <td class="p-3">
-                            <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-red-700 transition-all" onclick="hapusLaporan(${t.id})">
-                                <i class="fa-solid fa-trash"></i> Hapus
-                            </button>
-                        </td>
-                    </tr>`;
-            }).join('');
-        }
+        globalLaporanCache = data || []; // Simpan di cache untuk ekspor
+        
+        laporanTable.innerHTML = globalLaporanCache.map(t => {
+          const name = t.produk?.nama || 'Produk Dihapus';
+          return `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
+              <td class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(t.created_at)}</td>
+              <td class="p-3">${escapeHtml(name)}</td>
+              <td class="p-3">${t.qty}</td>
+              <td class="p-3 font-medium">${formatRupiah(t.total)}</td>
+              <td class="p-3 font-medium text-green-600 dark:text-green-400">${formatRupiah(t.keuntungan)}</td>
+              <td class="p-3">
+                  <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-red-700 transition-all" onclick="hapusLaporan(${t.id})">
+                      <i class="fa-solid fa-trash"></i> Hapus
+                  </button>
+              </td>
+            </tr>`;
+        }).join('');
+      } catch (err) {
+        console.error('loadLaporan err', err);
+        laporanTable.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-red-500">Gagal memuat data laporan.</td></tr>`;
+      }
     }
-
-async function loadLaporan() {
-      // [PERBAIKAN] Tampilkan loading
-      showLoading('Memfilter laporan...');
-      laporanTable.innerHTML = `
-          <tr>
-              <td colspan="6" class="p-4 text-center text-slate-500 dark:text-slate-400">
-                  <i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data laporan...
-              </td>
-          </tr>`;
-
-      try {
-        const tglMulai = document.getElementById('laporanTglMulai').value;
-        const tglSelesai = document.getElementById('laporanTglSelesai').value;
-
-        let query = supabase
-          .from('transaksi')
-          .select('id, produk_id, qty, total, keuntungan, created_at, produk:produk_id(nama)');
-          
-        // Terapkan filter tanggal jika ada
-        if (tglMulai) {
-            query = query.gte('created_at', new Date(tglMulai).toISOString());
-        }
-        if (tglSelesai) {
-            // Tambahkan T23:59:59 agar mencakup seluruh hari
-            query = query.lte('created_at', new Date(tglSelesai + 'T23:59:59').toISOString());
-        }
-
-        const { data, error } = await query
-          .order('created_at', { ascending: false })
-          .limit(500); // Ambil lebih banyak data (misal 500) untuk pencarian lokal
-     
-        if (error) throw error;
-        
-        globalLaporanCache = data || []; // Simpan di cache untuk ekspor DAN search
-        
-        // [PERBAIKAN] Panggil fungsi renderLokal, bukan render manual di sini
-        renderLaporanLokal(); 
-        
-      } catch (err) {
-        console.error('loadLaporan err', err);
-        laporanTable.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-red-500">Gagal memuat data laporan.</td></tr>`;
-      } finally {
-        // [PERBAIKAN] Sembunyikan loading
-        hideLoading();
-      }
-    }
     
     // Fungsi baru untuk hapus laporan
     window.hapusLaporan = async function(id) {
@@ -1793,11 +1716,6 @@ async function loadLaporan() {
   </script>
 </body>
 </html>
-
-
-
-
-
 
 
 
