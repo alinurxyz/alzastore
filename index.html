@@ -6,64 +6,62 @@
   <title>ALZA STORE</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .page { display: none; }
+    .active { display: block; }
+    nav button { transition: background 0.2s; }
+    nav button:hover { background-color: #2563eb; color: white; }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-900 font-sans">
-  <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 text-lg hidden z-50">
-    Menghubungkan ke Database...
-  </div>
+<body class="bg-gray-100 text-gray-900">
+  <div class="max-w-6xl mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-4 text-center">🛍️ ALZA STORE</h1>
 
-  <header class="bg-blue-600 text-white shadow">
-    <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
-      <h1 class="text-2xl font-bold">🛒 ALZA STORE</h1>
-      <nav class="space-x-4">
-        <button class="nav-btn font-medium" data-section="dashboard">Dashboard</button>
-        <button class="nav-btn font-medium" data-section="stok">Manajemen Stok</button>
-        <button class="nav-btn font-medium" data-section="kasir">Kasir</button>
-        <button class="nav-btn font-medium" data-section="laporan">Laporan</button>
-      </nav>
-    </div>
-  </header>
+    <!-- Navbar -->
+    <nav class="flex justify-center gap-4 mb-6">
+      <button onclick="showPage('dashboard')" class="px-4 py-2 bg-blue-500 text-white rounded">Dashboard</button>
+      <button onclick="showPage('stok')" class="px-4 py-2 bg-gray-200 rounded">Stok</button>
+      <button onclick="showPage('kasir')" class="px-4 py-2 bg-gray-200 rounded">Kasir</button>
+      <button onclick="showPage('laporan')" class="px-4 py-2 bg-gray-200 rounded">Laporan</button>
+    </nav>
 
-  <main class="max-w-6xl mx-auto p-4 space-y-6">
-    <!-- DASHBOARD -->
-    <section id="dashboard" class="hidden">
+    <!-- Loading -->
+    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 text-lg hidden">Menghubungkan ke Database...</div>
+
+    <!-- Dashboard -->
+    <section id="dashboard" class="page active">
       <h2 class="text-xl font-semibold mb-2">📊 Dashboard Penjualan</h2>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white p-4 rounded shadow text-center">
-          <p class="font-medium text-gray-600">Total Produk</p>
-          <p id="totalProduk" class="text-2xl font-bold">0</p>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="p-4 bg-white shadow rounded">
+          <p>Total Penjualan:</p>
+          <p id="totalPenjualan" class="text-xl font-bold">Rp 0</p>
         </div>
-        <div class="bg-white p-4 rounded shadow text-center">
-          <p class="font-medium text-gray-600">Total Penjualan</p>
-          <p id="totalPenjualan" class="text-2xl font-bold">Rp 0</p>
+        <div class="p-4 bg-white shadow rounded">
+          <p>Total Keuntungan:</p>
+          <p id="totalKeuntungan" class="text-xl font-bold">Rp 0</p>
         </div>
-        <div class="bg-white p-4 rounded shadow text-center">
-          <p class="font-medium text-gray-600">Total Keuntungan</p>
-          <p id="totalKeuntungan" class="text-2xl font-bold">Rp 0</p>
-        </div>
-        <div class="bg-white p-4 rounded shadow text-center">
-          <p class="font-medium text-gray-600">Transaksi Hari Ini</p>
-          <p id="transaksiHarian" class="text-2xl font-bold">0</p>
+        <div class="p-4 bg-white shadow rounded">
+          <p>Total Produk:</p>
+          <p id="totalProduk" class="text-xl font-bold">0</p>
         </div>
       </div>
     </section>
 
-    <!-- MANAJEMEN STOK -->
-    <section id="stok" class="hidden">
-      <h2 class="text-xl font-semibold mb-2">📦 Manajemen Stok Barang</h2>
-      <form id="productForm" class="grid grid-cols-1 md:grid-cols-6 gap-2 mb-4">
-        <input id="sku" placeholder="SKU" class="border p-2 rounded" required>
-        <input id="nama" placeholder="Nama Produk" class="border p-2 rounded" required>
-        <input id="modal" type="number" placeholder="Modal" class="border p-2 rounded" required>
-        <input id="harga_jual" type="number" placeholder="Harga Jual" class="border p-2 rounded" required>
-        <input id="stokValue" type="number" placeholder="Stok" class="border p-2 rounded" required>
-        <button class="bg-blue-600 text-white py-2 rounded">Tambah</button>
+    <!-- Manajemen Stok -->
+    <section id="stok" class="page">
+      <h2 class="text-xl font-semibold mb-2">📦 Manajemen Stok</h2>
+      <form id="form-stok" class="grid grid-cols-1 md:grid-cols-5 gap-2 mb-4">
+        <input type="hidden" id="stok-id">
+        <input type="text" id="stok-nama" placeholder="Nama Produk" class="border p-2 rounded" required>
+        <input type="number" id="stok-modal" placeholder="Modal" class="border p-2 rounded" required>
+        <input type="number" id="stok-harga" placeholder="Harga Jual" class="border p-2 rounded" required>
+        <input type="number" id="stok-jumlah" placeholder="Stok" class="border p-2 rounded" required>
+        <button type="submit" class="col-span-1 md:col-span-5 bg-blue-600 text-white py-2 rounded">Simpan</button>
       </form>
 
       <table class="min-w-full bg-white border rounded shadow">
         <thead>
           <tr class="bg-gray-200 text-left">
-            <th class="p-2">SKU</th>
             <th class="p-2">Nama</th>
             <th class="p-2">Modal</th>
             <th class="p-2">Harga</th>
@@ -71,174 +69,180 @@
             <th class="p-2">Aksi</th>
           </tr>
         </thead>
-        <tbody id="productTable"></tbody>
+        <tbody id="stokTable"></tbody>
       </table>
     </section>
 
-    <!-- KASIR -->
-    <section id="kasir" class="hidden">
-      <h2 class="text-xl font-semibold mb-2">💰 Kasir (POS)</h2>
-      <form id="kasirForm" class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
-        <select id="produkSelect" class="border p-2 rounded"></select>
-        <input id="qty" type="number" placeholder="Jumlah" class="border p-2 rounded" required>
-        <button class="bg-green-600 text-white py-2 rounded">Proses</button>
+    <!-- Kasir -->
+    <section id="kasir" class="page">
+      <h2 class="text-xl font-semibold mb-2">🧾 Kasir</h2>
+      <form id="form-kasir" class="grid grid-cols-1 md:grid-cols-4 gap-2 mb-4">
+        <select id="kasir-produk" class="border p-2 rounded" required></select>
+        <input type="number" id="kasir-qty" placeholder="Qty" class="border p-2 rounded" required>
+        <button type="submit" class="bg-green-600 text-white py-2 rounded col-span-1 md:col-span-2">Proses Transaksi</button>
       </form>
-      <div id="kasirResult" class="text-lg font-medium text-green-700"></div>
-    </section>
 
-    <!-- LAPORAN -->
-    <section id="laporan" class="hidden">
-      <h2 class="text-xl font-semibold mb-2">📑 Laporan Penjualan</h2>
       <table class="min-w-full bg-white border rounded shadow">
         <thead>
           <tr class="bg-gray-200 text-left">
             <th class="p-2">Produk</th>
             <th class="p-2">Qty</th>
             <th class="p-2">Total</th>
-            <th class="p-2">Keuntungan</th>
+            <th class="p-2">Waktu</th>
+          </tr>
+        </thead>
+        <tbody id="kasirTable"></tbody>
+      </table>
+    </section>
+
+    <!-- Laporan -->
+    <section id="laporan" class="page">
+      <h2 class="text-xl font-semibold mb-2">📑 Laporan Penjualan</h2>
+      <table class="min-w-full bg-white border rounded shadow">
+        <thead>
+          <tr class="bg-gray-200 text-left">
             <th class="p-2">Tanggal</th>
+            <th class="p-2">Produk</th>
+            <th class="p-2">Qty</th>
+            <th class="p-2">Total</th>
+            <th class="p-2">Keuntungan</th>
           </tr>
         </thead>
         <tbody id="laporanTable"></tbody>
       </table>
     </section>
-  </main>
+  </div>
 
   <script>
     const supabaseUrl = 'https://pmxkyzgsauzxeidbjuhd.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBteGt5emdzYXV6eGVpZGJqdWhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjMwNDAsImV4cCI6MjA3NjY5OTA0MH0.oXlVN7F-CXN6zDCuOOr8u2N6efIo9GWd9JyJ5O0_fyA';
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    const loading = document.getElementById('loading');
-    const sections = document.querySelectorAll('main section');
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      loading.classList.remove('hidden');
-      await loadProducts();
-      await updateDashboard();
-      await loadProductOptions();
-      await loadLaporan();
-      loading.classList.add('hidden');
-      showSection('dashboard');
-    });
-
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      btn.addEventListener('click', () => showSection(btn.dataset.section));
-    });
-
-    function showSection(id) {
-      sections.forEach(sec => sec.classList.add('hidden'));
-      document.getElementById(id).classList.remove('hidden');
+    const pages = ['dashboard', 'stok', 'kasir', 'laporan'];
+    function showPage(id) {
+      pages.forEach(p => document.getElementById(p).classList.remove('active'));
+      document.getElementById(id).classList.add('active');
     }
 
-    // === PRODUK ===
-    async function loadProducts() {
-      const { data, error } = await supabaseClient.from('produk').select('*').order('id');
-      if (error) console.error(error);
-      const tbody = document.getElementById('productTable');
+    document.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('loading').classList.remove('hidden');
+      await Promise.all([loadDashboard(), loadStok(), loadKasir(), loadLaporan()]);
+      document.getElementById('loading').classList.add('hidden');
+    });
+
+    // === DASHBOARD ===
+    async function loadDashboard() {
+      const { data: produk } = await supabase.from('produk').select('*');
+      const { data: transaksi } = await supabase.from('transaksi').select('*');
+      const totalProduk = produk?.length || 0;
+      const totalPenjualan = transaksi?.reduce((sum, t) => sum + t.total, 0) || 0;
+      const totalKeuntungan = transaksi?.reduce((sum, t) => sum + t.keuntungan, 0) || 0;
+      document.getElementById('totalProduk').textContent = totalProduk;
+      document.getElementById('totalPenjualan').textContent = 'Rp ' + totalPenjualan.toLocaleString('id-ID');
+      document.getElementById('totalKeuntungan').textContent = 'Rp ' + totalKeuntungan.toLocaleString('id-ID');
+    }
+
+    // === STOK ===
+    async function loadStok() {
+      const { data } = await supabase.from('produk').select('*').order('id', { ascending: false });
+      const tbody = document.getElementById('stokTable');
+      const selectKasir = document.getElementById('kasir-produk');
       tbody.innerHTML = '';
+      selectKasir.innerHTML = '<option value="">Pilih Produk</option>';
+
       data.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class='p-2'>${p.sku || '-'}</td>
-          <td class='p-2'>${p.nama}</td>
-          <td class='p-2'>Rp ${Number(p.modal).toLocaleString('id-ID')}</td>
-          <td class='p-2'>Rp ${Number(p.harga_jual).toLocaleString('id-ID')}</td>
-          <td class='p-2'>${p.stok}</td>
-          <td class='p-2'>
-            <button class='bg-red-600 text-white px-2 py-1 rounded' onclick='deleteProduct(${p.id})'>Hapus</button>
-          </td>`;
-        tbody.appendChild(tr);
+        tbody.innerHTML += `
+          <tr>
+            <td class="p-2">${p.nama}</td>
+            <td class="p-2">Rp ${p.modal}</td>
+            <td class="p-2">Rp ${p.harga_jual}</td>
+            <td class="p-2">${p.stok}</td>
+            <td class="p-2">
+              <button class="bg-yellow-500 text-white px-2 py-1 rounded" onclick="editStok(${p.id}, '${p.nama}', ${p.modal}, ${p.harga_jual}, ${p.stok})">Edit</button>
+              <button class="bg-red-600 text-white px-2 py-1 rounded" onclick="hapusProduk(${p.id})">Hapus</button>
+            </td>
+          </tr>
+        `;
+        selectKasir.innerHTML += `<option value="${p.id}">${p.nama}</option>`;
       });
     }
 
-    document.getElementById('productForm').addEventListener('submit', async e => {
+    function editStok(id, nama, modal, harga, stok) {
+      document.getElementById('stok-id').value = id;
+      document.getElementById('stok-nama').value = nama;
+      document.getElementById('stok-modal').value = modal;
+      document.getElementById('stok-harga').value = harga;
+      document.getElementById('stok-jumlah').value = stok;
+    }
+
+    document.getElementById('form-stok').addEventListener('submit', async e => {
       e.preventDefault();
-      const sku = sku.value;
-      const nama = document.getElementById('nama').value;
-      const modal = parseFloat(document.getElementById('modal').value);
-      const harga_jual = parseFloat(document.getElementById('harga_jual').value);
-      const stok = parseInt(document.getElementById('stokValue').value);
-      const { error } = await supabaseClient.from('produk').insert([{ sku, nama, modal, harga_jual, stok }]);
-      if (error) return alert('Gagal tambah produk: ' + error.message);
+      const id = document.getElementById('stok-id').value;
+      const nama = document.getElementById('stok-nama').value;
+      const modal = parseFloat(document.getElementById('stok-modal').value);
+      const harga_jual = parseFloat(document.getElementById('stok-harga').value);
+      const stok = parseInt(document.getElementById('stok-jumlah').value);
+
+      if (id) {
+        await supabase.from('produk').update({ nama, modal, harga_jual, stok }).eq('id', id);
+      } else {
+        await supabase.from('produk').insert([{ nama, modal, harga_jual, stok }]);
+      }
       e.target.reset();
-      await loadProducts();
-      await updateDashboard();
-      await loadProductOptions();
+      loadStok();
+      loadDashboard();
     });
 
-    async function deleteProduct(id) {
-      if (!confirm('Yakin hapus produk ini?')) return;
-      const { error } = await supabaseClient.from('produk').delete().eq('id', id);
-      if (error) alert(error.message);
-      else {
-        await loadProducts();
-        await updateDashboard();
-        await loadProductOptions();
+    async function hapusProduk(id) {
+      if (confirm('Hapus produk ini?')) {
+        await supabase.from('produk').delete().eq('id', id);
+        loadStok();
+        loadDashboard();
       }
     }
 
     // === KASIR ===
-    async function loadProductOptions() {
-      const { data } = await supabaseClient.from('produk').select('*');
-      const select = document.getElementById('produkSelect');
-      select.innerHTML = data.map(p => `<option value="${p.id}">${p.nama} (Rp ${p.harga_jual})</option>`).join('');
-    }
-
-    document.getElementById('kasirForm').addEventListener('submit', async e => {
+    document.getElementById('form-kasir').addEventListener('submit', async e => {
       e.preventDefault();
-      const produk_id = parseInt(document.getElementById('produkSelect').value);
-      const qty = parseInt(document.getElementById('qty').value);
-      const { data: produk } = await supabaseClient.from('produk').select('*').eq('id', produk_id).single();
-      if (!produk || qty > produk.stok) return alert('Stok tidak cukup!');
+      const produk_id = parseInt(document.getElementById('kasir-produk').value);
+      const qty = parseInt(document.getElementById('kasir-qty').value);
+      if (!produk_id || qty <= 0) return alert('Lengkapi data!');
 
-      const total = produk.harga_jual * qty;
-      const keuntungan = (produk.harga_jual - produk.modal) * qty;
-
-      const { error } = await supabaseClient.from('transaksi').insert([{ produk_id, qty, total, keuntungan }]);
-      if (error) return alert('Gagal input transaksi: ' + error.message);
-
-      await supabaseClient.from('produk').update({ stok: produk.stok - qty }).eq('id', produk_id);
-
-      document.getElementById('kasirResult').textContent = `✅ Transaksi sukses! Total: Rp ${total.toLocaleString('id-ID')}`;
+      const { error } = await supabase.from('transaksi').insert([{ produk_id, qty }]);
+      if (error) alert('Gagal transaksi: ' + error.message);
       e.target.reset();
-      await updateDashboard();
-      await loadProducts();
-      await loadLaporan();
+      loadKasir();
+      loadLaporan();
+      loadDashboard();
+      loadStok();
     });
+
+    async function loadKasir() {
+      const { data, error } = await supabase.from('transaksi').select('*, produk(nama)').order('id', { ascending: false });
+      if (error) return console.error(error);
+      const tbody = document.getElementById('kasirTable');
+      tbody.innerHTML = data.map(t => `
+        <tr>
+          <td class="p-2">${t.produk.nama}</td>
+          <td class="p-2">${t.qty}</td>
+          <td class="p-2">Rp ${t.total?.toLocaleString('id-ID')}</td>
+          <td class="p-2">${new Date(t.created_at).toLocaleString('id-ID')}</td>
+        </tr>`).join('');
+    }
 
     // === LAPORAN ===
     async function loadLaporan() {
-      const { data, error } = await supabaseClient.from('transaksi').select('*, produk:produk_id(nama)').order('id', { ascending: false });
-      if (error) console.error(error);
+      const { data, error } = await supabase.from('transaksi').select('*, produk(nama)').order('id', { ascending: false });
+      if (error) return console.error(error);
       const tbody = document.getElementById('laporanTable');
-      tbody.innerHTML = '';
-      data.forEach(t => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class='p-2'>${t.produk.nama}</td>
-          <td class='p-2'>${t.qty}</td>
-          <td class='p-2'>Rp ${t.total.toLocaleString('id-ID')}</td>
-          <td class='p-2'>Rp ${t.keuntungan.toLocaleString('id-ID')}</td>
-          <td class='p-2'>${new Date(t.created_at).toLocaleString('id-ID')}</td>`;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // === DASHBOARD ===
-    async function updateDashboard() {
-      const { data: produk } = await supabaseClient.from('produk').select('*');
-      const { data: transaksi } = await supabaseClient.from('transaksi').select('*');
-      const totalProduk = produk?.length || 0;
-      const totalPenjualan = transaksi?.reduce((sum, t) => sum + t.total, 0) || 0;
-      const totalKeuntungan = transaksi?.reduce((sum, t) => sum + t.keuntungan, 0) || 0;
-      const today = new Date().toISOString().slice(0, 10);
-      const transaksiHarian = transaksi?.filter(t => t.created_at.startsWith(today)).length || 0;
-
-      document.getElementById('totalProduk').textContent = totalProduk;
-      document.getElementById('totalPenjualan').textContent = 'Rp ' + totalPenjualan.toLocaleString('id-ID');
-      document.getElementById('totalKeuntungan').textContent = 'Rp ' + totalKeuntungan.toLocaleString('id-ID');
-      document.getElementById('transaksiHarian').textContent = transaksiHarian;
+      tbody.innerHTML = data.map(t => `
+        <tr>
+          <td class="p-2">${new Date(t.created_at).toLocaleString('id-ID')}</td>
+          <td class="p-2">${t.produk.nama}</td>
+          <td class="p-2">${t.qty}</td>
+          <td class="p-2">Rp ${t.total?.toLocaleString('id-ID')}</td>
+          <td class="p-2">Rp ${t.keuntungan?.toLocaleString('id-ID')}</td>
+        </tr>`).join('');
     }
   </script>
 </body>
