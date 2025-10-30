@@ -1482,7 +1482,7 @@ button.type = 'button';
           
         // Terapkan filter tanggal jika ada
         if (tglMulai) {
-            query = query.gte('created_at', new Date(tglMulai).toISOString());
+            query = query.gte('created_at', new Date(tglMulai + 'T00:00:00').toISOString());
         }
         if (tglSelesai) {
             // Tambahkan T23:59:59 agar mencakup seluruh hari
@@ -1716,6 +1716,7 @@ button.type = 'button';
   </script>
 </body>
 </html>
+
 
 
 
