@@ -1161,6 +1161,54 @@ button.type = 'button';
       }
     };
 
+// ===========================
+    //  KASIR (POS)
+    // ===========================
+
+    /**
+     * Mengisi dropdown produk di halaman kasir
+     * @param {Array<object>} produkList - Daftar produk dari cache
+     */
+    function populateKasirProducts(produkList) {
+        // Simpan referensi ke option pertama ("-- Pilih Produk --")
+        const defaultOption = kasirSelect.querySelector('option[value=""]');
+        
+        // Kosongkan select
+        kasirSelect.innerHTML = '';
+        
+        // Tambahkan kembali option default
+        if (defaultOption) {
+            kasirSelect.appendChild(defaultOption);
+        }
+
+        // Filter produk yang ada stok
+        const produkTersedia = produkList.filter(p => p.stok > 0);
+
+        // Tambahkan produk yang tersedia
+        produkTersedia.forEach(p => {
+            const option = document.createElement('option');
+            option.value = p.id;
+            // Tampilkan nama, stok, dan harga untuk mempermudah
+            option.textContent = `${escapeHtml(p.nama)} (Stok: ${p.stok}) - ${formatRupiah(p.harga_jual)}`;
+            kasirSelect.appendChild(option);
+        });
+        
+        // (Opsional) Tambahkan grup untuk produk yg stoknya habis
+        const produkHabis = produkList.filter(p => p.stok <= 0);
+        if (produkHabis.length > 0) {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = "Stok Habis";
+            produkHabis.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.textContent = `${escapeHtml(p.nama)} (Stok: 0)`;
+                option.disabled = true; // Buat tidak bisa dipilih
+                optgroup.appendChild(option);
+            });
+            kasirSelect.appendChild(optgroup);
+        }
+    }
+    
     // ===========================
     //  KASIR (POS)
     // ===========================
@@ -1668,6 +1716,7 @@ button.type = 'button';
   </script>
 </body>
 </html>
+
 
 
 
