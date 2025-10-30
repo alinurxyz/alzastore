@@ -959,14 +959,13 @@
       if (id) {
           showLoading('Memperbarui produk...');
           try {
-              // Stok diambil dari stokJumlahEl karena di mode edit,
-              // varian-related inputs dinonaktifkan
-              const { error } = await supabase.from('produk').update({ nama, modal, harga_jual, stok }).eq('id', id);
+              // PERUBAHAN: Tambahkan .select() untuk memastikan konsistensi data
+              const { error } = await supabase.from('produk').update({ nama, modal, harga_jual, stok }).eq('id', id).select();
               if (error) throw error;
           } catch (err) {
               console.error('formStok update error', err);
               alert('Gagal update produk: ' + (err.message || err));
-              hideLoading();
+              hideLoading(); // Sembunyikan loading HANYA jika gagal
               return;
           }
       } 
@@ -1000,14 +999,15 @@
                   });
               }
               
-              // Insert array produk ke supabase
-              const { error } = await supabase.from('produk').insert(productsToInsert);
+              // PERUBAHAN: Tambahkan .select() untuk memastikan konsistensi data
+              // Ini memaksa Supabase menunggu data benar-benar tersimpan sebelum melanjutkan
+              const { error } = await supabase.from('produk').insert(productsToInsert).select();
               if (error) throw error;
               
           } catch (err) {
               console.error('formStok insert error', err);
               alert('Gagal simpan produk: ' + (err.message || err));
-              hideLoading();
+              hideLoading(); // Sembunyikan loading HANYA jika gagal
               return;
           }
       }
@@ -1020,9 +1020,12 @@
       varianInfo.textContent = 'Jika varian diisi, **Stok di atas akan diabaikan**. Jika tidak ada varian, Stok di atas akan digunakan.';
       varianInfo.classList.remove('hidden');
       tambahVarianBtn.disabled = false; // Re-enable tombol tambah varian
-      await refreshAllData();
+      
+      // Panggil refresh. refreshAllData() akan mengurus show/hide loading sendiri
+      await refreshAllData(); 
       showPage('stok');
-      hideLoading(); // Pindahkan hideLoading ke sini
+      // PERUBAHAN: Hapus hideLoading() dari sini.
+      // refreshAllData() sudah menanganinya.
     }
     
     function tambahVarianInput() {
@@ -1665,6 +1668,7 @@ button.type = 'button';
   </script>
 </body>
 </html>
+
 
 
 
