@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ALZA STORE - Grow Your Business</title>
+  <title>ALZA STORE - Futuristic</title>
 
   <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -121,12 +121,12 @@
         <div id="receiptContent" class="bg-white dark:bg-slate-800 text-sm p-4 rounded-md">
           <div class="text-center mb-4">
             <h4 class="text-xl font-bold">ALZA STORE</h4>
-            <p class="text-xs text-slate-600 dark:text-slate-400">Sri Menanti, Kotabumi Utara, Lampung</p>
+            <p class="text-xs text-slate-600 dark:text-slate-400">Jl. Merdeka No. 123, Kota Bahagia</p>
           </div>
           <div class="border-t border-b border-dashed border-slate-300 dark:border-slate-600 py-2 mb-2">
             <div class="flex justify-between">
               <span id="receiptDate" class="text-xs">2024-10-30 12:30:00</span>
-              <span class="text-xs">Kasir: Hanisa Zahra</span>
+              <span class="text-xs">Kasir: Admin</span>
             </div>
           </div>
           <table class="w-full mb-2">
@@ -288,10 +288,25 @@
         <h2 class="text-xl font-semibold mb-4">Manajemen Stok</h2>
         <form id="formStok" class="grid grid-cols-1 md:grid-cols-5 gap-4">
           <input id="stokId" type="hidden" />
-          <input id="stokNama" placeholder="Nama produk" class="md:col-span-2 border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+          <input id="stokNama" placeholder="Nama produk (e.g. Kaos Polos)" class="md:col-span-2 border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
           <input id="stokModal" type="number" step="0.01" placeholder="Modal (e.g. 2500)" class="border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
           <input id="stokHarga" type="number" step="0.01" placeholder="Harga Jual (e.g. 4000)" class="border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-          <input id="stokJumlah" type="number" placeholder="Stok" class="border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+          <input id="stokJumlah" type="number" placeholder="Stok (jika tanpa varian)" class="border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          
+          <!-- Bagian Varian Baru -->
+          <div class="md:col-span-5 bg-slate-50 dark:bg-slate-700/50 p-3 rounded-lg">
+            <div class="flex justify-between items-center mb-2">
+              <label class="font-medium text-sm text-slate-700 dark:text-slate-300">Varian (Opsional)</label>
+              <button id="tambahVarianBtn" type="button" class="bg-blue-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-lg hover:bg-blue-600 transition-all">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+            <div id="varianContainer" class="space-y-2">
+              <!-- Input varian akan ditambahkan oleh JS di sini -->
+              <p id="varianInfo" class="text-xs text-slate-500 dark:text-slate-400">Jika varian diisi, **Stok di atas akan diabaikan**. Jika tidak ada varian, Stok di atas akan digunakan.</p>
+            </div>
+          </div>
+          
           <button class="col-span-1 md:col-span-5 bg-blue-600 text-white py-3 rounded-lg font-semibold text-base shadow-md hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2">
             <i class="fa-solid fa-save"></i>
             <span id="stokButtonText">Simpan Produk Baru</span>
@@ -402,11 +417,21 @@
       <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
           <h2 class="text-xl font-semibold">Laporan Penjualan</h2>
+          
+          <!-- Filter Tanggal Baru -->
+          <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+             <input type="date" id="laporanTglMulai" class="border p-2 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+             <input type="date" id="laporanTglSelesai" class="border p-2 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+             <button id="laporanFilterBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-filter"></i> Filter
+             </button>
+          </div>
+          
           <button id="exportExcelBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 shadow-md transition-all duration-200 flex items-center gap-2">
             <i class="fa-solid fa-file-excel"></i> Ekspor ke Excel
           </button>
         </div>
-        <div class="overflow-x-auto">
+        <div class="overflowx-auto">
           <table class="min-w-full text-sm">
             <thead class="bg-slate-100 dark:bg-slate-700">
               <tr>
@@ -415,6 +440,7 @@
                 <th class="p-3 text-left font-semibold">Qty</th>
                 <th class="p-3 text-left font-semibold">Total</th>
                 <th class="p-3 text-left font-semibold">Keuntungan</th>
+                <th class="p-3 text-left font-semibold">Aksi</th> <!-- Kolom Aksi Baru -->
               </tr>
             </thead>
             <tbody id="laporanTable" class="divide-y dark:divide-slate-700">
@@ -429,6 +455,7 @@
 
   <script>
     // ---------- CONFIG SUPABASE ----------
+
     // !!! GANTI DENGAN KUNCI ANDA !!!
     const SUPABASE_URL = 'https://pmxkyzgsauzxeidbjuhd.supabase.co'; 
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBteGt5emdzYXV6eGVpZGJqdWhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjMwNDAsImV4cCI6MjA3NjY5OTA0MH0.oXlVN7F-CXN6zDCuOOr8u2N6efIo9GWd9JyJ5O0_fyA'; 
@@ -466,6 +493,9 @@
     const stokHargaEl = document.getElementById('stokHarga');
     const stokJumlahEl = document.getElementById('stokJumlah');
     const stokButtonTextEl = document.getElementById('stokButtonText');
+    const varianContainer = document.getElementById('varianContainer');
+    const tambahVarianBtn = document.getElementById('tambahVarianBtn');
+    const varianInfo = document.getElementById('varianInfo');
     
     // Kasir Form Elements
     const kasirQtyEl = document.getElementById('kasirQty');
@@ -557,22 +587,6 @@
     function formatTanggal(dateInput) {
         const date = new Date(dateInput);
         return date.toLocaleString('id-ID', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
-
-    /**
-     * Memformat tanggal
-     * @param {string | Date} dateInput - String tanggal atau objek Date
-     * @returns {string} - String format (e.g. "30 Okt 2024, 13:00")
-     */
-    function formatTanggal(dateInput) {
-        const date = new Date(dateInput);
-        return date.toLocaleString('id-ID', {
             timeZone: 'Asia/Jakarta', // Ditambahkan: Mengatur zona waktu ke WIB (GMT+7)
             day: 'numeric',
             month: 'short',
@@ -581,7 +595,7 @@
             minute: '2-digit'
         });
     }
-    
+
     /**
      * Membersihkan HTML string
      * @param {string} text - Teks input
@@ -660,6 +674,7 @@
       // Wire clear buttons
       document.getElementById('kasirClear').addEventListener('click', () => formKasir.reset());
       document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+      document.getElementById('laporanFilterBtn').addEventListener('click', loadLaporan); // Filter laporan
       
       // Wire modal buttons
       document.getElementById('closeModalBtn').addEventListener('click', () => closeReceiptModal(true)); // Ttp struk & refresh
@@ -674,6 +689,14 @@
       // Wire keranjang buttons
       prosesKeranjangBtn.addEventListener('click', handleProsesKeranjang);
       clearKeranjangBtn.addEventListener('click', handleClearKeranjang);
+
+      // Wire Varian Button
+      tambahVarianBtn.addEventListener('click', tambahVarianInput);
+      
+      // Set tanggal default untuk filter laporan
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('laporanTglMulai').value = today;
+      document.getElementById('laporanTglSelesai').value = today;
     });
 
     /**
@@ -906,59 +929,162 @@
       }
     }
 
-    function updateKasirDropdown(products) {
-      const currentVal = kasirSelect.value;
-      kasirSelect.innerHTML = '<option value="">-- Pilih Produk --</option>';
-      (products || []).forEach(p => {
-        if(p.stok > 0) { // Hanya tampilkan produk yang ada stok
-            const opt = document.createElement('option');
-            opt.value = p.id;
-            opt.textContent = `${escapeHtml(p.nama)} — ${formatRupiah(p.harga_jual)} (Stok: ${p.stok})`;
-            kasirSelect.appendChild(opt);
-        }
-      });
-      kasirSelect.value = currentVal; // Coba set ke nilai sebelumnya
-    }
-
     async function handleStokSubmit(ev) {
       ev.preventDefault();
-      const id = stokIdEl.value;
+      const id = stokIdEl.value; // ID untuk mode update
       const nama = stokNamaEl.value.trim();
       const modal = Number(stokModalEl.value) || 0;
       const harga_jual = Number(stokHargaEl.value) || 0;
-      const stok = parseInt(stokJumlahEl.value) || 0;
+      const stok = parseInt(stokJumlahEl.value) || 0; // Stok utama (tanpa varian)
+      
+      const varianRows = document.querySelectorAll('.varian-row');
+      const varianList = Array.from(varianRows).map(row => {
+          const varianNama = row.querySelector('.varian-nama').value.trim();
+          const varianStok = parseInt(row.querySelector('.varian-stok').value) || 0;
+          return { varianNama, varianStok };
+      }).filter(v => v.varianNama); // Filter yg namanya diisi
 
       if (!nama) return alert('Nama produk wajib diisi');
-      if (modal < 0 || harga_jual < 0 || stok < 0) return alert('Angka tidak boleh negatif');
+      
+      // Validasi Angka
+      const angkaInvalid = [modal, harga_jual, ...varianList.map(v => v.varianStok)].some(v => v < 0);
+      if (angkaInvalid) return alert('Angka (modal, harga, stok) tidak boleh negatif');
+      if (varianList.length === 0 && stok < 0) return alert('Stok tidak boleh negatif');
+      
       if (harga_jual < modal) {
           if(!confirm('Harga jual lebih rendah dari modal. Yakin?')) return;
       }
-
-      showLoading(id ? 'Memperbarui produk...' : 'Menyimpan produk...');
-      try {
-        if (id) {
-          // Update
-          const { error } = await supabase.from('produk').update({ nama, modal, harga_jual, stok }).eq('id', id);
-          if (error) throw error;
-        } else {
-          // Insert
-          const { error } = await supabase.from('produk').insert([{ nama, modal, harga_jual, stok }]);
-          if (error) throw error;
-        }
-        
-        formStok.reset();
-        stokIdEl.value = '';
-        stokButtonTextEl.textContent = 'Simpan Produk Baru';
-        await refreshAllData();
-        showPage('stok');
-
-      } catch (err) {
-        console.error('formStok submit error', err);
-        alert('Gagal simpan produk: ' + (err.message || err));
-      } finally {
-        hideLoading();
+      
+      // Mode EDIT: Selalu 1 produk
+      if (id) {
+          showLoading('Memperbarui produk...');
+          try {
+              // Stok diambil dari stokJumlahEl karena di mode edit,
+              // varian-related inputs dinonaktifkan
+              const { error } = await supabase.from('produk').update({ nama, modal, harga_jual, stok }).eq('id', id);
+              if (error) throw error;
+          } catch (err) {
+              console.error('formStok update error', err);
+              alert('Gagal update produk: ' + (err.message || err));
+              hideLoading();
+              return;
+          }
+      } 
+      // Mode INSERT: Bisa 1 produk atau banyak (dengan varian)
+      else {
+          showLoading('Menyimpan produk...');
+          try {
+              let productsToInsert = [];
+              
+              if (varianList.length > 0) {
+                  // Buat produk untuk setiap varian
+                  productsToInsert = varianList.map(varian => ({
+                      nama: `${nama} - ${varian.varianNama}`,
+                      modal: modal,
+                      harga_jual: harga_jual,
+                      stok: varian.varianStok // Gunakan stok per varian
+                  }));
+              } else {
+                  // Buat satu produk tanpa varian
+                  if (stok <= 0) {
+                      if(!confirm('Stok produk 0 atau negatif. Yakin ingin simpan?')) {
+                          hideLoading();
+                          return;
+                      }
+                  }
+                  productsToInsert.push({
+                      nama: nama,
+                      modal: modal,
+                      harga_jual: harga_jual,
+                      stok: stok // Gunakan stok utama
+                  });
+              }
+              
+              // Insert array produk ke supabase
+              const { error } = await supabase.from('produk').insert(productsToInsert);
+              if (error) throw error;
+              
+          } catch (err) {
+              console.error('formStok insert error', err);
+              alert('Gagal simpan produk: ' + (err.message || err));
+              hideLoading();
+              return;
+          }
       }
+      
+      // Sukses (Update & Insert)
+      formStok.reset();
+      stokIdEl.value = '';
+      stokButtonTextEl.textContent = 'Simpan Produk Baru';
+      varianContainer.innerHTML = ''; // Hapus input varian
+      varianInfo.textContent = 'Jika varian diisi, **Stok di atas akan diabaikan**. Jika tidak ada varian, Stok di atas akan digunakan.';
+      varianInfo.classList.remove('hidden');
+      tambahVarianBtn.disabled = false; // Re-enable tombol tambah varian
+      await refreshAllData();
+      showPage('stok');
+      hideLoading(); // Pindahkan hideLoading ke sini
     }
+    
+    function tambahVarianInput() {
+        varianInfo.classList.add('hidden'); // Sembunyikan teks info
+        
+        const div = document.createElement('div');
+        div.className = 'varian-row grid grid-cols-3 gap-2';
+        
+        const inputNama = document.createElement('input');
+        inputNama.type = 'text';
+        inputNama.className = 'varian-nama col-span-2 border p-2 rounded-lg bg-white dark:bg-slate-800 dark:border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500';
+        inputNama.placeholder = 'Nama Varian (e.g. Merah)';
+        
+        const inputStok = document.createElement('input');
+        inputStok.type = 'number';
+        inputStok.className = 'varian-stok border p-2 rounded-lg bg-white dark:bg-slate-800 dark:border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500';
+        inputStok.placeholder = 'Stok';
+        inputStok.min = '0';
+        
+        const button = document.createElement('button');
+button.type = 'button';
+        button.className = 'col-start-3 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center font-bold text-lg hover:bg-red-600 transition-all';
+        button.innerHTML = '<i class="fa-solid fa-times text-xs"></i>';
+        button.style.gridRow = '1'; // Pastikan di baris yg sama
+        button.style.alignSelf = 'center'; // Tengahkan
+        button.style.justifySelf = 'end'; // Taruh di akhir kolom
+        
+        button.onclick = () => {
+            div.remove();
+            if (varianContainer.children.length === 1) { // Hanya ada info text
+                varianInfo.classList.remove('hidden');
+            }
+        };
+        
+        // Atur ulang grid untuk menampung tombol
+        div.appendChild(inputNama); // Kolom 1-2
+        div.appendChild(inputStok); // Kolom 3 (akan didorong oleh tombol)
+        div.appendChild(button);  // Kolom 3 (taruh di akhir)
+        
+        // Perbaiki layout
+        inputNama.className = 'varian-nama col-span-2 border p-2 rounded-lg bg-white dark:bg-slate-800 dark:border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500'; // Span 2
+        
+        const stokContainer = document.createElement('div');
+        stokContainer.className = 'col-span-1 flex gap-2 items-center'; // Bikin container untuk stok + tombol
+        
+        inputStok.className = 'varian-stok flex-1 w-full border p-2 rounded-lg bg-white dark:bg-slate-800 dark:border-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500';
+        inputStok.placeholder = 'Stok';
+        
+        button.className = 'bg-red-500 text-white w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-lg hover:bg-red-600 transition-all';
+        button.style = ''; // Hapus style inline
+        
+        stokContainer.appendChild(inputStok);
+        stokContainer.appendChild(button);
+        
+        div.className = 'varian-row grid grid-cols-3 gap-2'; // Reset div utama
+        div.appendChild(inputNama);
+        div.appendChild(stokContainer);
+        
+        varianContainer.appendChild(div);
+        inputNama.focus();
+    }
+
 
     // Dipanggil oleh onclick di tabel
     window.prepareEdit = async function (id) {
@@ -978,6 +1104,12 @@
         stokHargaEl.value = data.harga_jual;
         stokJumlahEl.value = data.stok;
         stokButtonTextEl.textContent = `Update Produk (ID: ${data.id})`;
+        
+        // Nonaktifkan fungsionalitas varian saat mode edit
+        tambahVarianBtn.disabled = true;
+        varianContainer.innerHTML = ''; // Hapus input varian yg mungkin ada
+        varianInfo.textContent = 'Mode edit hanya untuk 1 produk. Varian tidak dapat diubah dari sini.';
+        varianInfo.classList.remove('hidden');
         
         showPage('stok');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1033,32 +1165,62 @@
       try {
         const { data, error } = await supabase
           .from('transaksi')
-          .select('id, produk_id, qty, total, created_at, keuntungan, produk:produk_id(nama, harga_jual, modal)')
+          .select('id, produk_id, qty, total, created_at, keuntungan, produk:produk_id(nama, harga_jual, modal), nota_id') // Tambah nota_id
           .order('created_at', { ascending: false })
-          .limit(20); // Hanya 20 terbaru di halaman kasir
+          .limit(100); // Ambil lebih banyak untuk grouping
         if (error) throw error;
         
-        kasirTable.innerHTML = (data || []).map(t => {
-          const name = t.produk?.nama || 'Produk Dihapus';
-          const total = Number(t.total || 0);
+        // --- LOGIKA GROUPING BARU ---
+        const groupedByNota = (data || []).reduce((acc, t) => {
+            // Gunakan nota_id. Jika tidak ada (data lama), gunakan created_at sebagai ID unik
+            const notaId = t.nota_id || t.created_at; 
+            
+            if (!acc[notaId]) {
+                acc[notaId] = {
+                    nota_id: notaId,
+                    items: [],
+                    total: 0,
+                    qty: 0,
+                    created_at: t.created_at
+                };
+            }
+            
+            acc[notaId].items.push(t);
+            acc[notaId].total += Number(t.total || 0);
+            acc[notaId].qty += Number(t.qty || 0);
+            
+            return acc;
+        }, {});
+        
+        // Ubah objek hasil group menjadi array dan urutkan
+        const sortedNotas = Object.values(groupedByNota)
+            .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+        kasirTable.innerHTML = sortedNotas.slice(0, 20).map(nota => { // Tampilkan 20 nota terbaru
           
-          // Data untuk reprint
-          const reprintData = {
-              nama: name,
+          // Data untuk reprint (sekarang array)
+          const reprintData = nota.items.map(t => ({
+              nama: t.produk?.nama || 'Produk Dihapus',
               qty: t.qty,
               total: t.total,
               harga_satuan: t.produk?.harga_jual || (t.total / t.qty),
               tanggal: t.created_at
-          };
+          }));
           
+          // Tampilkan nama produk
+          const productNames = nota.items.map(t => {
+              const name = t.produk?.nama || 'Produk Dihapus';
+              return `<span class="block text-xs">${escapeHtml(name)} (${t.qty}x)</span>`;
+          }).join('');
+
           return `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
-              <td class="p-3">${escapeHtml(name)}</td>
-              <td class="p-3">${t.qty}</td>
-              <td class="p-3 font-medium">${formatRupiah(total)}</td>
-              <td class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(t.created_at)}</td>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200 align-top">
+              <td class="p-3">${productNames}</td>
+              <td class="p-3">${nota.qty}</td>
+              <td class="p-3 font-medium">${formatRupiah(nota.total)}</td>
+              <td class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(nota.created_at)}</td>
               <td class="p-3">
-                <button class="bg-sky-500 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-sky-600 transition-all" onclick='reprintReceipt(${JSON.stringify(reprintData)})'>
+                <button class="bg-sky-500 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-sky-600 transition-all" onclick='reprintReceipt(${JSON.stringify(reprintData)}, "${nota.created_at}")'>
                   <i class="fa-solid fa-receipt"></i> Struk
                 </button>
               </td>
@@ -1189,6 +1351,7 @@
 
             let errorMsg = '';
             const itemsToProcess = []; // Data valid yg siap diproses
+            const notaId = crypto.randomUUID(); // Buat ID Nota unik
 
             for (const item of keranjang) {
                 const latestInfo = latestProdukData.find(p => p.id === item.produk_id);
@@ -1231,7 +1394,8 @@
                         produk_id: item.produk_id, 
                         qty: item.qty,
                         total: total,
-                        keuntungan: keuntungan
+                        keuntungan: keuntungan,
+                        nota_id: notaId // <-- TAMBAHKAN NOTA ID
                     }),
                     supabase.from('produk').update({ stok: newStok }).eq('id', item.produk_id)
                 ]);
@@ -1258,11 +1422,26 @@
     // ===========================
     async function loadLaporan() {
       try {
-        const { data, error } = await supabase
+        const tglMulai = document.getElementById('laporanTglMulai').value;
+        const tglSelesai = document.getElementById('laporanTglSelesai').value;
+
+        let query = supabase
           .from('transaksi')
-          .select('id, produk_id, qty, total, keuntungan, created_at, produk:produk_id(nama)')
+          .select('id, produk_id, qty, total, keuntungan, created_at, produk:produk_id(nama)');
+          
+        // Terapkan filter tanggal jika ada
+        if (tglMulai) {
+            query = query.gte('created_at', new Date(tglMulai).toISOString());
+        }
+        if (tglSelesai) {
+            // Tambahkan T23:59:59 agar mencakup seluruh hari
+            query = query.lte('created_at', new Date(tglSelesai + 'T23:59:59').toISOString());
+        }
+
+        const { data, error } = await query
           .order('created_at', { ascending: false })
           .limit(200); // Batasi 200 untuk tampilan
+          
         if (error) throw error;
         
         globalLaporanCache = data || []; // Simpan di cache untuk ekspor
@@ -1276,13 +1455,39 @@
               <td class="p-3">${t.qty}</td>
               <td class="p-3 font-medium">${formatRupiah(t.total)}</td>
               <td class="p-3 font-medium text-green-600 dark:text-green-400">${formatRupiah(t.keuntungan)}</td>
+              <td class="p-3">
+                  <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-red-700 transition-all" onclick="hapusLaporan(${t.id})">
+                      <i class="fa-solid fa-trash"></i> Hapus
+                  </button>
+              </td>
             </tr>`;
         }).join('');
       } catch (err) {
         console.error('loadLaporan err', err);
-        laporanTable.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-red-500">Gagal memuat data laporan.</td></tr>`;
+        laporanTable.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-red-500">Gagal memuat data laporan.</td></tr>`;
       }
     }
+    
+    // Fungsi baru untuk hapus laporan
+    window.hapusLaporan = async function(id) {
+        if (!confirm('Yakin ingin menghapus transaksi ini? Stok produk TIDAK akan dikembalikan secara otomatis.')) return;
+        
+        showLoading('Menghapus transaksi...');
+        try {
+            const { error } = await supabase.from('transaksi').delete().eq('id', id);
+            if (error) throw error;
+            
+            // Refresh data di semua halaman
+            await refreshAllData();
+            
+        } catch (err) {
+            console.error('hapusLaporan err', err);
+            alert('Gagal menghapus transaksi: ' + (err.message || err));
+        } finally {
+            hideLoading();
+        }
+    }
+
 
     // ===========================
     //  EKSPOR & STRUK
@@ -1363,9 +1568,14 @@
      * Dipanggil oleh onclick di riwayat kasir (Sudah dimodifikasi)
      * @param {object} data - { nama, qty, total, harga_satuan, tanggal }
      */
-    window.reprintReceipt = function(data) {
-        // Bungkus dalam array agar sesuai format showReceiptModal
-        showReceiptModal([data], data.tanggal);
+    window.reprintReceipt = function(dataOrItems, tanggal) {
+        if (Array.isArray(dataOrItems)) {
+            // Kasus baru: dataOrItems adalah array
+            showReceiptModal(dataOrItems, tanggal);
+        } else {
+            // Kasus lama: dataOrItems adalah objek tunggal (dijaga untuk kompatibilitas)
+            showReceiptModal([dataOrItems], dataOrItems.tanggal);
+        }
     }
 
     function closeReceiptModal(doRefresh = true) {
@@ -1455,6 +1665,7 @@
   </script>
 </body>
 </html>
+
 
 
 
