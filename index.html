@@ -1482,18 +1482,22 @@ button.type = 'button';
           
 // Terapkan filter tanggal jika ada
         if (tglMulai) {
-            // PERBAIKAN v2: Buat tanggal secara manual untuk memaksa Waktu Lokal
-            const parts = tglMulai.split('-'); // e.g., ['2025', '10', '30']
-            // new Date(tahun, bulan (0-11), hari) -> ini membuat tgl 30 jam 00:00 LOKAL
+            // Buat tanggal jam 00:00 LOKAL (Ini tetap diperlukan)
+            const parts = tglMulai.split('-'); 
             const tglMulaiLokal = new Date(parts[0], parts[1] - 1, parts[2]); 
             query = query.gte('created_at', tglMulaiLokal.toISOString());
         }
         if (tglSelesai) {
-            // PERBAIKAN v2: Lakukan hal yang sama untuk tglSelesai agar konsisten
+            // PERBAIKAN (Logika +1 Hari):
             const parts = tglSelesai.split('-');
-            // Buat tanggal jam 23:59:59 LOKAL
-            const tglSelesaiLokal = new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59);
-            query = query.lte('created_at', tglSelesaiLokal.toISOString());
+            // Buat tanggal jam 00:00 LOKAL
+            const tglSelesaiLokal = new Date(parts[0], parts[1] - 1, parts[2]);
+            
+            // Tambahkan 1 hari ke tanggal selesai
+            tglSelesaiLokal.setDate(tglSelesaiLokal.getDate() + 1);
+            
+            // Ganti operator menjadi 'lt' (less than)
+            query = query.lt('created_at', tglSelesaiLokal.toISOString());
         }
 
         const { data, error } = await query
@@ -1723,6 +1727,7 @@ button.type = 'button';
   </script>
 </body>
 </html>
+
 
 
 
