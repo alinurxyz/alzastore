@@ -413,25 +413,31 @@
     </section>
 
     <!-- ===== PAGE: LAPORAN ===== -->
-    <section id="laporan" class="page">
-      <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-          <h2 class="text-xl font-semibold">Laporan Penjualan</h2>
-          
-          <!-- Filter Tanggal Baru -->
-          <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-             <input type="date" id="laporanTglMulai" class="border p-2 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-             <input type="date" id="laporanTglSelesai" class="border p-2 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-             <button id="laporanFilterBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-filter"></i> Filter
-             </button>
-          </div>
-          
-          <button id="exportExcelBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 shadow-md transition-all duration-200 flex items-center gap-2">
-            <i class="fa-solid fa-file-excel"></i> Ekspor ke Excel
-          </button>
-        </div>
-        <div class="overflowx-auto">
+<section id="laporan" class="page">
+      <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+          <h2 class="text-xl font-semibold">Laporan Penjualan</h2>
+          
+                    <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+             <input type="date" id="laporanTglMulai" class="border p-2 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+             <input type="date" id="laporanTglSelesai" class="border p-2 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+             <button id="laporanFilterBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-filter"></i> Filter
+             </button>
+          </div>
+          
+                    <div class="flex gap-2 w-full sm:w-auto">
+             <input type="search" id="laporanSearch" placeholder="Cari nama produk..." class="border p-2 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+             <button id="laporanSearchBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-all duration-200 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-search"></i> Cari
+             </button>
+          </div>
+          
+          <button id="exportExcelBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 shadow-md transition-all duration-200 flex items-center gap-2">
+            <i class="fa-solid fa-file-excel"></i> Ekspor ke Excel
+          </button>
+        </div>
+        <div class="overflowx-auto">
           <table class="min-w-full text-sm">
             <thead class="bg-slate-100 dark:bg-slate-700">
               <tr>
@@ -1771,6 +1777,7 @@ async function loadLaporan() {
   </script>
 </body>
 </html>
+
 
 
 
