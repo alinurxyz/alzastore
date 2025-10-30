@@ -1,136 +1,263 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ALZA STORE</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #0078ff;
+      color: white;
+      padding: 15px 25px;
+      text-align: center;
+      font-size: 1.6em;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    main {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 {
+      color: #333;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 800px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background: #0078ff;
+      color: white;
+    }
+
+    input, button {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin: 5px;
+    }
+
+    button {
+      background: #0078ff;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #005fcc;
+    }
+
+    #loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.3em;
+      color: #0078ff;
+      z-index: 999;
+    }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-900">
-  <div class="max-w-6xl mx-auto p-4">
-    <h1 class="text-3xl font-bold mb-4">ALZA STORE</h1>
-    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 text-lg hidden">Menghubungkan ke Database...</div>
+<body>
+  <header>🛍️ ALZA STORE</header>
 
-    <section id="dashboard" class="hidden">
-      <h2 class="text-xl font-semibold mb-2">Dashboard Penjualan</h2>
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div class="p-4 bg-white shadow rounded">
-          <p class="font-medium">Total Penjualan:</p>
-          <p id="totalPenjualan" class="text-xl font-bold">Rp 0</p>
-        </div>
-        <div class="p-4 bg-white shadow rounded">
-          <p class="font-medium">Total Keuntungan:</p>
-          <p id="totalKeuntungan" class="text-xl font-bold">Rp 0</p>
-        </div>
-        <div class="p-4 bg-white shadow rounded">
-          <p class="font-medium">Total Produk:</p>
-          <p id="totalProduk" class="text-xl font-bold">0</p>
-        </div>
-      </div>
-    </section>
+  <div id="loading">Menghubungkan ke Database...</div>
 
-    <section id="inventory" class="mt-6">
-      <h2 class="text-xl font-semibold mb-2">Data Stok Barang</h2>
-      <form id="productForm" class="grid grid-cols-1 md:grid-cols-5 gap-2 mb-4">
-        <input type="text" id="sku" placeholder="SKU" class="border p-2 rounded" required>
-        <input type="text" id="name" placeholder="Nama Produk" class="border p-2 rounded" required>
-        <input type="number" id="cost" placeholder="Modal" class="border p-2 rounded" required>
-        <input type="number" id="price" placeholder="Harga Jual" class="border p-2 rounded" required>
-        <input type="number" id="stock" placeholder="Stok" class="border p-2 rounded" required>
-        <button type="submit" class="col-span-1 md:col-span-5 bg-blue-600 text-white py-2 rounded">Tambah Produk</button>
+  <main>
+    <!-- DASHBOARD -->
+    <div class="card" id="dashboard">
+      <h2>📊 Dashboard</h2>
+      <p>Total Produk: <span id="totalProduk">0</span></p>
+      <p>Total Penjualan: Rp<span id="totalPenjualan">0</span></p>
+      <p>Total Keuntungan: Rp<span id="totalKeuntungan">0</span></p>
+    </div>
+
+    <!-- STOK BARANG -->
+    <div class="card">
+      <h2>📦 Data Stok Barang</h2>
+      <form id="formProduk">
+        <input type="text" id="nama" placeholder="Nama Produk" required>
+        <input type="number" id="modal" placeholder="Modal" required>
+        <input type="number" id="harga_jual" placeholder="Harga Jual" required>
+        <input type="number" id="stok" placeholder="Stok" required>
+        <button type="submit">Tambah Produk</button>
       </form>
 
-      <table class="min-w-full bg-white border rounded shadow">
+      <table>
         <thead>
-          <tr class="bg-gray-200 text-left">
-            <th class="p-2">SKU</th>
-            <th class="p-2">Nama</th>
-            <th class="p-2">Modal</th>
-            <th class="p-2">Harga</th>
-            <th class="p-2">Stok</th>
-            <th class="p-2">Aksi</th>
+          <tr>
+            <th>Nama</th>
+            <th>Modal</th>
+            <th>Harga Jual</th>
+            <th>Stok</th>
+            <th>Aksi</th>
           </tr>
         </thead>
-        <tbody id="productTable"></tbody>
+        <tbody id="tabelProduk"></tbody>
       </table>
-    </section>
-  </div>
+    </div>
+
+    <!-- LAPORAN PENJUALAN -->
+    <div class="card">
+      <h2>💰 Laporan Penjualan</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Produk</th>
+            <th>Qty</th>
+            <th>Total</th>
+            <th>Keuntungan</th>
+            <th>Tanggal</th>
+          </tr>
+        </thead>
+        <tbody id="tabelTransaksi"></tbody>
+      </table>
+    </div>
+  </main>
 
   <script>
-    const supabaseUrl = 'https://pmxkyzgsauzxeidbjuhd.supabase.co'; // ganti
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBteGt5emdzYXV6eGVpZGJqdWhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjMwNDAsImV4cCI6MjA3NjY5OTA0MH0.oXlVN7F-CXN6zDCuOOr8u2N6efIo9GWd9JyJ5O0_fyA'; // ganti
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const SUPABASE_URL = "https://pmxkyzgsauzxeidbjuhd.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBteGt5emdzYXV6eGVpZGJqdWhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjExMjMwNDAsImV4cCI6MjA3NjY5OTA0MH0.oXlVN7F-CXN6zDCuOOr8u2N6efIo9GWd9JyJ5O0_fyA";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const loading = document.getElementById('loading');
-    const dashboard = document.getElementById('dashboard');
-    const tableBody = document.getElementById('productTable');
+    const tabelProduk = document.getElementById('tabelProduk');
+    const tabelTransaksi = document.getElementById('tabelTransaksi');
 
     document.addEventListener('DOMContentLoaded', async () => {
-      loading.classList.remove('hidden');
       try {
-        await loadProducts();
+        await loadProduk();
+        await loadTransaksi();
         await updateDashboard();
-        loading.classList.add('hidden');
-        dashboard.classList.remove('hidden');
-      } catch (err) {
-        loading.textContent = 'Gagal terhubung ke database: ' + err.message;
+        loading.style.display = 'none';
+      } catch (e) {
+        loading.textContent = 'Gagal menghubungkan ke database.';
       }
     });
 
-    async function loadProducts() {
-      const { data, error } = await supabase.from('products').select('*');
-      if (error) throw error;
-      tableBody.innerHTML = '';
+    // === LOAD PRODUK ===
+    async function loadProduk() {
+      const { data, error } = await supabase.from('produk').select('*').order('id', { ascending: true });
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      tabelProduk.innerHTML = '';
       data.forEach(p => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td class='p-2'>${p.sku}</td>
-          <td class='p-2'>${p.name}</td>
-          <td class='p-2'>Rp ${p.cost.toLocaleString('id-ID')}</td>
-          <td class='p-2'>Rp ${p.price.toLocaleString('id-ID')}</td>
-          <td class='p-2'>${p.stock}</td>
-          <td class='p-2'>
-            <button class='bg-yellow-500 text-white px-2 py-1 rounded' onclick='editProduct(${p.id})'>Edit</button>
-            <button class='bg-red-600 text-white px-2 py-1 rounded' onclick='deleteProduct(${p.id})'>Hapus</button>
-          </td>`;
-        tableBody.appendChild(row);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${p.nama}</td>
+          <td>Rp${p.modal}</td>
+          <td>Rp${p.harga_jual}</td>
+          <td>${p.stok}</td>
+          <td><button onclick="hapusProduk(${p.id})">Hapus</button></td>
+        `;
+        tabelProduk.appendChild(tr);
       });
     }
 
-    document.getElementById('productForm').addEventListener('submit', async e => {
+    // === TAMBAH PRODUK ===
+    document.getElementById('formProduk').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const sku = document.getElementById('sku').value;
-      const name = document.getElementById('name').value;
-      const cost = parseFloat(document.getElementById('cost').value);
-      const price = parseFloat(document.getElementById('price').value);
-      const stock = parseInt(document.getElementById('stock').value);
+      const nama = document.getElementById('nama').value;
+      const modal = parseFloat(document.getElementById('modal').value);
+      const harga_jual = parseFloat(document.getElementById('harga_jual').value);
+      const stok = parseInt(document.getElementById('stok').value);
 
-      const { error } = await supabase.from('products').insert([{ sku, name, cost, price, stock }]);
-      if (error) return alert('Gagal menambah produk: ' + error.message);
+      const { error } = await supabase.from('produk').insert([{ nama, modal, harga_jual, stok }]);
+      if (error) {
+        alert("Gagal tambah produk: " + error.message);
+        return;
+      }
+
       e.target.reset();
-      loadProducts();
-      updateDashboard();
+      await loadProduk();
+      await updateDashboard();
     });
 
-    async function deleteProduct(id) {
+    // === HAPUS PRODUK ===
+    async function hapusProduk(id) {
       if (!confirm('Yakin hapus produk ini?')) return;
-      const { error } = await supabase.from('products').delete().eq('id', id);
-      if (error) alert('Gagal hapus: ' + error.message);
-      else loadProducts();
+      const { error } = await supabase.from('produk').delete().eq('id', id);
+      if (error) alert("Gagal hapus produk: " + error.message);
+      await loadProduk();
+      await updateDashboard();
     }
 
+    // === LOAD TRANSAKSI ===
+    async function loadTransaksi() {
+      const { data, error } = await supabase.from('transaksi').select('*, produk(nama)').order('created_at', { ascending: false });
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      tabelTransaksi.innerHTML = '';
+      data.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${t.produk?.nama || '-'}</td>
+          <td>${t.qty}</td>
+          <td>Rp${t.total}</td>
+          <td>Rp${t.keuntungan}</td>
+          <td>${new Date(t.created_at).toLocaleString()}</td>
+        `;
+        tabelTransaksi.appendChild(tr);
+      });
+    }
+
+    // === DASHBOARD ===
     async function updateDashboard() {
-      const { data: products } = await supabase.from('products').select('*');
-      const { data: sales } = await supabase.from('sales').select('*');
-      const totalProduk = products ? products.length : 0;
-      const totalPenjualan = sales ? sales.reduce((s, x) => s + x.total, 0) : 0;
-      const totalKeuntungan = sales ? sales.reduce((s, x) => s + x.profit, 0) : 0;
+      const { data: produk } = await supabase.from('produk').select('*');
+      const { data: transaksi } = await supabase.from('transaksi').select('*');
+
+      const totalProduk = produk?.length || 0;
+      const totalPenjualan = transaksi?.reduce((a, b) => a + Number(b.total), 0) || 0;
+      const totalKeuntungan = transaksi?.reduce((a, b) => a + Number(b.keuntungan), 0) || 0;
+
       document.getElementById('totalProduk').textContent = totalProduk;
-      document.getElementById('totalPenjualan').textContent = 'Rp ' + totalPenjualan.toLocaleString('id-ID');
-      document.getElementById('totalKeuntungan').textContent = 'Rp ' + totalKeuntungan.toLocaleString('id-ID');
+      document.getElementById('totalPenjualan').textContent = totalPenjualan.toLocaleString();
+      document.getElementById('totalKeuntungan').textContent = totalKeuntungan.toLocaleString();
     }
   </script>
 </body>
 </html>
-
