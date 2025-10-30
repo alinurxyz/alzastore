@@ -1467,57 +1467,112 @@ button.type = 'button';
         }
     }
 
-
     // ===========================
-    //  LAPORAN
-    // ===========================
-    async function loadLaporan() {
-      try {
-        const tglMulai = document.getElementById('laporanTglMulai').value;
-        const tglSelesai = document.getElementById('laporanTglSelesai').value;
+    //  LAPORAN
+    // ===========================
 
-        let query = supabase
-          .from('transaksi')
-          .select('id, produk_id, qty, total, keuntungan, created_at, produk:produk_id(nama)');
-          
-        // Terapkan filter tanggal jika ada
-        if (tglMulai) {
-            query = query.gte('created_at', new Date(tglMulai).toISOString());
-        }
-        if (tglSelesai) {
-            // Tambahkan T23:59:59 agar mencakup seluruh hari
-            query = query.lte('created_at', new Date(tglSelesai + 'T23:59:59').toISOString());
+    /**
+     * [BARU] Merender tabel laporan dari data di globalLaporanCache
+     * Fungsi ini juga menangani filter pencarian lokal.
+     */
+    function renderLaporanLokal() {
+        const searchTerm = document.getElementById('laporanSearch').value.toLowerCase();
+        
+        let dataToRender = globalLaporanCache;
+
+        // 1. Terapkan filter pencarian lokal jika ada
+        if (searchTerm) {
+            dataToRender = globalLaporanCache.filter(t => {
+                const namaProduk = t.produk?.nama || 'produk dihapus';
+                return namaProduk.toLowerCase().includes(searchTerm);
+            });
         }
 
-        const { data, error } = await query
-          .order('created_at', { ascending: false })
-          .limit(200); // Batasi 200 untuk tampilan
-          
-        if (error) throw error;
-        
-        globalLaporanCache = data || []; // Simpan di cache untuk ekspor
-        
-        laporanTable.innerHTML = globalLaporanCache.map(t => {
-          const name = t.produk?.nama || 'Produk Dihapus';
-          return `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
-              <td class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(t.created_at)}</td>
-              <td class="p-3">${escapeHtml(name)}</td>
-              <td class="p-3">${t.qty}</td>
-              <td class="p-3 font-medium">${formatRupiah(t.total)}</td>
-              <td class="p-3 font-medium text-green-600 dark:text-green-400">${formatRupiah(t.keuntungan)}</td>
-              <td class="p-3">
-                  <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-red-700 transition-all" onclick="hapusLaporan(${t.id})">
-                      <i class="fa-solid fa-trash"></i> Hapus
-                  </button>
-              </td>
-            </tr>`;
-        }).join('');
-      } catch (err) {
-        console.error('loadLaporan err', err);
-        laporanTable.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-red-500">Gagal memuat data laporan.</td></tr>`;
-      }
+        // 2. Render tabel
+        if (dataToRender.length === 0) {
+            // Tampilkan pesan berdasarkan apakah ada filter atau tidak
+            if (searchTerm) {
+                laporanTable.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-4 text-center text-slate-500 dark:text-slate-400">
+                            Tidak ada produk dengan nama "${escapeHtml(searchTerm)}" pada rentang tanggal ini.
+                        </td>
+                    </tr>`;
+            } else {
+                laporanTable.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-4 text-center text-slate-500 dark:text-slate-400">
+                            Tidak ada data transaksi untuk rentang tanggal yang dipilih.
+                        </td>
+                    </tr>`;
+            }
+        } else {
+            // Render data seperti biasa
+            laporanTable.innerHTML = dataToRender.map(t => {
+                const name = t.produk?.nama || 'Produk Dihapus';
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
+                        <td class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(t.created_at)}</td>
+                        <td class="p-3">${escapeHtml(name)}</td>
+                        <td class="p-3">${t.qty}</td>
+                        <td class="p-3 font-medium">${formatRupiah(t.total)}</td>
+                        <td class="p-3 font-medium text-green-600 dark:text-green-400">${formatRupiah(t.keuntungan)}</td>
+                        <td class="p-3">
+                            <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-red-700 transition-all" onclick="hapusLaporan(${t.id})">
+                                <i class="fa-solid fa-trash"></i> Hapus
+                            </button>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
     }
+
+async function loadLaporan() {
+      // [PERBAIKAN] Tampilkan loading
+      showLoading('Memfilter laporan...');
+      laporanTable.innerHTML = `
+          <tr>
+              <td colspan="6" class="p-4 text-center text-slate-500 dark:text-slate-400">
+                  <i class="fa-solid fa-spinner fa-spin mr-2"></i> Memuat data laporan...
+              </td>
+          </tr>`;
+
+      try {
+        const tglMulai = document.getElementById('laporanTglMulai').value;
+        const tglSelesai = document.getElementById('laporanTglSelesai').value;
+
+        let query = supabase
+          .from('transaksi')
+          .select('id, produk_id, qty, total, keuntungan, created_at, produk:produk_id(nama)');
+          
+        // Terapkan filter tanggal jika ada
+        if (tglMulai) {
+            query = query.gte('created_at', new Date(tglMulai).toISOString());
+        }
+        if (tglSelesai) {
+            // Tambahkan T23:59:59 agar mencakup seluruh hari
+            query = query.lte('created_at', new Date(tglSelesai + 'T23:59:59').toISOString());
+        }
+
+        const { data, error } = await query
+          .order('created_at', { ascending: false })
+          .limit(500); // Ambil lebih banyak data (misal 500) untuk pencarian lokal
+     
+        if (error) throw error;
+        
+        globalLaporanCache = data || []; // Simpan di cache untuk ekspor DAN search
+        
+        // [PERBAIKAN] Panggil fungsi renderLokal, bukan render manual di sini
+        renderLaporanLokal(); 
+        
+      } catch (err) {
+        console.error('loadLaporan err', err);
+        laporanTable.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-red-500">Gagal memuat data laporan.</td></tr>`;
+      } finally {
+        // [PERBAIKAN] Sembunyikan loading
+        hideLoading();
+      }
+    }
     
     // Fungsi baru untuk hapus laporan
     window.hapusLaporan = async function(id) {
@@ -1716,6 +1771,7 @@ button.type = 'button';
   </script>
 </body>
 </html>
+
 
 
 
