@@ -769,6 +769,11 @@
       // Wire forms
       formStok.addEventListener('submit', handleStokSubmit);
       formKasir.addEventListener('submit', handleAddToCart); // DIUBAH: dari handleKasirSubmit
+
+      const kasirNamaInput = document.getElementById('kasirNamaPembeli');
+        if (kasirNamaInput) {
+            kasirNamaInput.addEventListener('input', updateKeranjangPembeliDisplay);
+        }
       
       // Wire clear buttons
       document.getElementById('kasirClear').addEventListener('click', () => formKasir.reset());
@@ -1261,25 +1266,6 @@ button.type = 'button';
       }
     };
 
-/**
-     * [BARU] Helper function untuk update tampilan nama pembeli di keranjang
-     * Ini dipanggil saat mengetik di input nama atau saat item ditambah/dihapus
-     */
-    function updateKeranjangPembeliDisplay() {
-        const namaPembeli = document.getElementById('kasirNamaPembeli').value.trim();
-        const displayContainer = document.getElementById('displayKeranjangPembeli');
-        const displayText = document.getElementById('displayNamaPembeliText');
-        
-        if (!displayContainer || !displayText) return; // Safety check
-
-        // Tampilkan hanya jika ada nama DAN ada item di keranjang
-        if (namaPembeli && keranjang.length > 0) {
-            displayText.textContent = namaPembeli;
-            displayContainer.classList.remove('hidden');
-        } else {
-            displayContainer.classList.add('hidden');
-        }
-    }
 
 // ===========================
     //  KASIR (POS)
@@ -1461,19 +1447,50 @@ button.type = 'button';
     }
 
     /**
-     * Merender tabel keranjang dari state `keranjang`
+     * [BARU] Helper function untuk update tampilan nama pembeli di keranjang
+     * Ini dipanggil saat mengetik di input nama atau saat item ditambah/dihapus
      */
-    function renderKeranjang() {
+    function updateKeranjangPembeliDisplay() {
+        // 1. Ambil nama yang sedang diketik
+        const namaPembeli = document.getElementById('kasirNamaPembeli').value.trim();
+        
+        // 2. Tentukan teks yang akan ditampilkan
+        // Jika nama kosong, kita ganti jadi "Umum". Jika terisi, tampilkan namanya.
+        const displayTextContent = namaPembeli || 'Umum'; 
+        
+        // 3. Ambil elemen HTML di keranjang
+        const displayContainer = document.getElementById('displayKeranjangPembeli');
+        const displayText = document.getElementById('displayNamaPembeliText');
+        
+        if (!displayContainer || !displayText) return; // Keamanan jika HTML salah
+
+        // 4. Update teksnya
+        displayText.textContent = displayTextContent;
+        
+        // Tampilkan/sembunyikan kontainer berdasarkan apakah ada item di keranjang
+        if (keranjang.length > 0) {
+            displayContainer.classList.remove('hidden');
+        } else {
+            displayContainer.classList.add('hidden');
+        }
+    }
+
+    /**
+ * Merender tabel keranjang dari state `keranjang`
+ * (Termasuk update untuk menampilkan nama pembeli)
+ */
+function renderKeranjang() {
     // Cek jika keranjang kosong
     if (keranjang.length === 0) {
         keranjangContainer.classList.add('hidden');
         
         // Panggil update display untuk menyembunyikan nama juga
         updateKeranjangPembeliDisplay(); 
-        return;
+        return; // Hentikan fungsi di sini
     }
 
     let total = 0;
+    // Render setiap item di keranjang
     keranjangTable.innerHTML = keranjang.map((item, index) => {
         const subtotal = item.harga_jual * item.qty;
         total += subtotal;
@@ -1498,7 +1515,7 @@ button.type = 'button';
     keranjangContainer.classList.remove('hidden');
 
     // Panggil helper function di akhir render
-    // Ini akan menampilkan nama jika inputnya terisi
+    // Ini akan menampilkan nama (atau "Umum") jika inputnya terisi
     updateKeranjangPembeliDisplay();
 }
 
@@ -1881,6 +1898,15 @@ button.type = 'button';
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
 
 
 
