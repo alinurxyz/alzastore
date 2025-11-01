@@ -1617,92 +1617,60 @@ button.type = 'button';
     // ===========================
     //  LAPORAN
     // ===========================
-    /**
-     * Memproses semua item di keranjang ke database
-     */
-    async function handleProsesKeranjang() {
-        if (keranjang.length === 0) return alert('Keranjang kosong!');
-
-        // [CEK 1] Pastikan ID input HTML Anda 'kasirNamaPembeli'
-        const namaPembeli = document.getElementById('kasirNamaPembeli').value.trim() || null; 
-
-        showLoading('Memproses keranjang...');
+    async function loadLaporan() {
         try {
-            // 1. Validasi stok terbaru dari DB
-            const produkIds = keranjang.map(item => item.produk_id);
-            const { data: latestProdukData, error: fetchErr } = await supabase
-                .from('produk')
-                .select('id, nama, stok, harga_jual, modal')
-                .in('id', produkIds);
+            const tglMulai = document.getElementById('laporanTglMulai').value;
+            const tglSelesai = document.getElementById('laporanTglSelesai').value;
+
+            let query = supabase
+            .from('transaksi')
+            // [CEK 1] Pastikan 'nama_pembeli' ada di dalam .select()
+            .select('id, produk_id, qty, total, keuntungan, created_at, nama_pembeli, produk:produk_id(nama)');
             
-            if (fetchErr) throw fetchErr;
-
-            let errorMsg = '';
-            const itemsToProcess = []; 
-            const notaId = crypto.randomUUID(); 
-
-            for (const item of keranjang) {
-                const latestInfo = latestProdukData.find(p => p.id === item.produk_id);
-                
-                if (!latestInfo) {
-                    errorMsg += `Produk "${item.nama}" tidak ditemukan lagi.\n`;
-                } else if (latestInfo.stok < item.qty) {
-                    errorMsg += `Stok ${latestInfo.nama} tidak cukup (sisa ${latestInfo.stok}).\n`;
-                } else {
-                    itemsToProcess.push({
-                        produk_id: item.produk_id,
-                        qty: item.qty,
-                        nama: latestInfo.nama,
-                        harga_jual: latestInfo.harga_jual,
-                        modal: latestInfo.modal,
-                        stok_terbaru: latestInfo.stok
-                    });
-                }
+            if (tglMulai) {
+                query = query.gte('created_at', new Date(tglMulai + 'T00:00:00').toISOString());
+            }
+            if (tglSelesai) {
+                query = query.lte('created_at', new Date(tglSelesai + 'T23:59:59').toISOString());
             }
 
-            if (errorMsg) {
-                hideLoading();
-                alert('Gagal proses keranjang:\n' + errorMsg);
-                await loadStok(); 
-                return;
-            }
-
-            // 2. Proses Transaksi (Insert ke 'transaksi' dan Update 'produk')
-            const prosesPromises = itemsToProcess.map(item => {
-                const total = (item.harga_jual || 0) * item.qty;
-                const keuntungan = (item.harga_jual - item.modal) * item.qty;
-                const newStok = item.stok_terbaru - item.qty;
-                
-                return Promise.all([
-                    supabase.from('transaksi').insert({ 
-                        produk_id: item.produk_id, 
-                        qty: item.qty,
-                        total: total,
-                        keuntungan: keuntungan,
-                        nota_id: notaId, 
-                        // [CEK 2] Pastikan baris ini ada
-                        nama_pembeli: namaPembeli 
-                    }),
-                    supabase.from('produk').update({ stok: newStok }).eq('id', item.produk_id)
-                ]);
-            });
-
-            await Promise.all(prosesPromises);
-
-            // 3. Sukses
-            lastProcessedCart = [...itemsToProcess]; 
-            handleClearKeranjang(); 
+            const { data, error } = await query
+            .order('created_at', { ascending: false })
+            .limit(200); 
             
-            // (Sudah di-handle oleh handleClearKeranjang)
-            // document.getElementById('kasirNamaPembeli').value = '';
-
-            hideLoading();
-            showConfirmModal(); 
-
+            if (error) throw error;
+            
+            globalLaporanCache = data || []; 
+            
+            laporanTable.innerHTML = globalLaporanCache.map(t => {
+                const name = t.produk?.nama || 'Produk Dihapus';
+                
+                // [CEK 2] Logika untuk menampilkan N/A jika 't.nama_pembeli' kosong
+                const pembeliHtml = t.nama_pembeli 
+                        ? escapeHtml(t.nama_pembeli) 
+                        : '<span class="text-slate-400 italic text-xs">N/A</span>';
+                        
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
+                        <td data-label="Tanggal" class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(t.created_at)}</td>
+                        <td data-label="Produk" class="p-3">${escapeHtml(name)}</td>
+                        
+                        <td data-label="Pembeli" class="p-3">${pembeliHtml}</td>
+                        
+                        <td data-label="Qty" class="p-3">${t.qty}</td>
+                        <td data-label="Total" class="p-3 font-medium">${formatRupiah(t.total)}</td>
+                        <td data-label="Keuntungan" class="p-3 font-medium text-green-600 dark:text-green-400">${formatRupiah(t.keuntungan)}</td>
+                        <td data-label="Aksi" class="p-3">
+                            <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-red-700 transition-all" onclick="hapusLaporan(${t.id})">
+                                <i class="fa-solid fa-trash"></i> Hapus
+                            </button>
+                        </td>
+                    </tr>`;
+            }).join('');
         } catch (err) {
-            console.error('handleProsesKeranjang err', err);
-            alert('Gagal memproses keranjang: ' + (err.message || err));
-            hideLoading();
+            console.error('loadLaporan err', err);
+            // [CEK 4] Pastikan colspan adalah 7 (karena ada 7 kolom)
+            laporanTable.innerHTML = `<tr><td colspan="7" class="p-3 text-center text-red-500">Gagal memuat data laporan.</td></tr>`;
         }
     }
     
