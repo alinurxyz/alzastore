@@ -1525,11 +1525,22 @@ button.type = 'button';
     /**
      * Memproses semua item di keranjang ke database
      */
+    /**
+     * Memproses semua item di keranjang ke database
+     * (Versi perbaikan untuk memastikan 'nama_pembeli' terkirim)
+     */
     async function handleProsesKeranjang() {
         if (keranjang.length === 0) return alert('Keranjang kosong!');
 
-        // [BARU] Ambil nama pembeli dari form
-        const namaPembeli = document.getElementById('kasirNamaPembeli').value.trim() || null; // null jika kosong
+        // [BAGIAN KRITIKAL 1]
+        // Ambil nama pembeli dari input HTML.
+        // Pastikan ID 'kasirNamaPembeli' sudah benar.
+        const namaPembeliInput = document.getElementById('kasirNamaPembeli');
+        if (!namaPembeliInput) {
+            alert("Error Kritis: Input 'kasirNamaPembeli' tidak ditemukan. Cek ID HTML Anda.");
+            return;
+        }
+        const namaPembeli = namaPembeliInput.value.trim() || null; 
 
         showLoading('Memproses keranjang...');
         try {
@@ -1543,8 +1554,8 @@ button.type = 'button';
             if (fetchErr) throw fetchErr;
 
             let errorMsg = '';
-            const itemsToProcess = []; // Data valid yg siap diproses
-            const notaId = crypto.randomUUID(); // Buat ID Nota unik
+            const itemsToProcess = []; 
+            const notaId = crypto.randomUUID(); 
 
             for (const item of keranjang) {
                 const latestInfo = latestProdukData.find(p => p.id === item.produk_id);
@@ -1554,7 +1565,6 @@ button.type = 'button';
                 } else if (latestInfo.stok < item.qty) {
                     errorMsg += `Stok ${latestInfo.nama} tidak cukup (sisa ${latestInfo.stok}).\n`;
                 } else {
-                    // Data valid, gunakan harga dan modal terbaru
                     itemsToProcess.push({
                         produk_id: item.produk_id,
                         qty: item.qty,
@@ -1566,7 +1576,6 @@ button.type = 'button';
                 }
             }
 
-            // Jika ada error stok/data, batalkan
             if (errorMsg) {
                 hideLoading();
                 alert('Gagal proses keranjang:\n' + errorMsg);
@@ -1580,16 +1589,20 @@ button.type = 'button';
                 const keuntungan = (item.harga_jual - item.modal) * item.qty;
                 const newStok = item.stok_terbaru - item.qty;
                 
-                // Lakukan insert dan update dalam satu promise
+                // Siapkan data untuk dikirim
+                const dataToInsert = { 
+                    produk_id: item.produk_id, 
+                    qty: item.qty,
+                    total: total,
+                    keuntungan: keuntungan,
+                    nota_id: notaId, 
+                    // [BAGIAN KRITIKAL 2]
+                    // Pastikan nama kolom 'nama_pembeli' sudah benar
+                    nama_pembeli: namaPembeli 
+                };
+
                 return Promise.all([
-                    supabase.from('transaksi').insert({ 
-                        produk_id: item.produk_id, 
-                        qty: item.qty,
-                        total: total,
-                        keuntungan: keuntungan,
-                        nota_id: notaId, 
-                        nama_pembeli: namaPembeli // <-- [BARU] Simpan nama pembeli
-                    }),
+                    supabase.from('transaksi').insert(dataToInsert),
                     supabase.from('produk').update({ stok: newStok }).eq('id', item.produk_id)
                 ]);
             });
@@ -1598,10 +1611,7 @@ button.type = 'button';
 
             // 3. Sukses
             lastProcessedCart = [...itemsToProcess]; 
-            handleClearKeranjang(); 
-            
-            // [BARU] Kosongkan juga nama pembeli di form
-            document.getElementById('kasirNamaPembeli').value = '';
+            handleClearKeranjang(); // Ini akan mengosongkan input nama juga
 
             hideLoading();
             showConfirmModal(); 
@@ -1871,15 +1881,6 @@ button.type = 'button';
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
 
 
 
