@@ -1409,6 +1409,9 @@ button.type = 'button';
     /**
      * Menambahkan item ke keranjang (dipicu oleh form kasir)
      */
+    /**
+     * Menambahkan item ke keranjang (dipicu oleh form kasir)
+     */
     function handleAddToCart(ev) {
         ev.preventDefault();
         const produkId = Number(kasirSelect.value);
@@ -1444,7 +1447,19 @@ button.type = 'button';
             });
         }
         
-        formKasir.reset(); // Reset form
+        // === PERBAIKAN DIMULAI DI SINI ===
+        
+        // 1. Simpan nama pembeli saat ini dari input
+        const namaPembeliInput = document.getElementById('kasirNamaPembeli');
+        const namaPembeliSaatIni = namaPembeliInput.value;
+        
+        formKasir.reset(); // Reset form (ini akan menghapus nama pembeli)
+        
+        // 2. Kembalikan nama pembeli ke input setelah reset
+        namaPembeliInput.value = namaPembeliSaatIni;
+
+        // === AKHIR PERBAIKAN ===
+        
         renderKeranjang(); // Tampilkan keranjang
     }
 
@@ -1902,6 +1917,7 @@ function renderKeranjang() {
   </script>
 </body>
 </html>
+
 
 
 
