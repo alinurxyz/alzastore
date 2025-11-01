@@ -1546,18 +1546,19 @@ function renderKeranjang() {
      * Memproses semua item di keranjang ke database
      * (Versi perbaikan untuk memastikan 'nama_pembeli' terkirim)
      */
+    /**
+     * Memproses semua item di keranjang ke database
+     * (Versi perbaikan untuk TES HARD-CODE)
+     */
     async function handleProsesKeranjang() {
         if (keranjang.length === 0) return alert('Keranjang kosong!');
 
-        // [BAGIAN KRITIKAL 1]
-        // Ambil nama pembeli dari input HTML.
-        // Pastikan ID 'kasirNamaPembeli' sudah benar.
-        const namaPembeliInput = document.getElementById('kasirNamaPembeli');
-        if (!namaPembeliInput) {
-            alert("Error Kritis: Input 'kasirNamaPembeli' tidak ditemukan. Cek ID HTML Anda.");
-            return;
-        }
-        const namaPembeli = namaPembeliInput.value.trim() || null; 
+        // [ --- BAGIAN TES --- ]
+        // Kita tidak akan membaca dari HTML. Kita akan memaksa nilainya.
+        // const namaPembeli = document.getElementById('kasirNamaPembeli').value.trim() || null; 
+        const namaPembeli = "TES DEBUG 123"; // <-- KITA PAKSA NILAINYA DI SINI
+        // [ --- AKHIR BAGIAN TES --- ]
+
 
         showLoading('Memproses keranjang...');
         try {
@@ -1613,9 +1614,7 @@ function renderKeranjang() {
                     total: total,
                     keuntungan: keuntungan,
                     nota_id: notaId, 
-                    // [BAGIAN KRITIKAL 2]
-                    // Pastikan nama kolom 'nama_pembeli' sudah benar
-                    nama_pembeli: namaPembeli 
+                    nama_pembeli: namaPembeli // Ini akan mengirim "TES DEBUG 123"
                 };
 
                 return Promise.all([
@@ -1628,8 +1627,7 @@ function renderKeranjang() {
 
             // 3. Sukses
             lastProcessedCart = [...itemsToProcess]; 
-            handleClearKeranjang(); // Ini akan mengosongkan input nama juga
-
+            handleClearKeranjang(); 
             hideLoading();
             showConfirmModal(); 
 
@@ -1898,6 +1896,7 @@ function renderKeranjang() {
   </script>
 </body>
 </html>
+
 
 
 
