@@ -1471,40 +1471,63 @@ button.type = 'button';
      * [FIXED] Helper function untuk update tampilan nama pembeli di keranjang
      * Ini dipanggil saat mengetik di input nama atau saat item ditambah/dihapus
      */
+    /**
+     * [FIXED] Helper function untuk update tampilan nama pembeli di keranjang
+     * Ini dipanggil saat mengetik di input nama atau saat item ditambah/dihapus
+     */
     function updateKeranjangPembeliDisplay() {
         // 1. Ambil input-nya
         const namaPembeliInput = document.getElementById('kasirNamaPembeli');
 
         // 2. Cek apakah input-nya ada
         if (!namaPembeliInput) {
-            // Jika input tidak ditemukan, jangan lakukan apa-apa
-            // (Ini mencegah error jika ID HTML Anda salah)
+            console.error("Input 'kasirNamaPembeli' tidak ditemukan.");
             return; 
         }
 
         // 3. Ambil nilainya
         const namaPembeli = namaPembeliInput.value.trim();
         
-        // 4. Tentukan teks yang akan ditampilkan
-        // Jika nama kosong, kita ganti jadi "Umum". Jika terisi, tampilkan namanya.
+        // 4. Tentukan teks yang akan ditampilkan (Logika ini sudah benar)
         const displayTextContent = namaPembeli || 'Umum'; 
         
-        // 5. Ambil elemen HTML di keranjang
-        const displayContainer = document.getElementById('displayKeranjangPembeli');
-        const displayText = document.getElementById('displayNamaPembeliText');
+        // 5. Ambil elemen HTML di keranjang (TARGET YANG BENAR)
+        const displayContainer = document.getElementById('keranjangNamaPembeli');
         
-        if (!displayContainer || !displayText) return; // Keamanan jika HTML keranjang salah
+        if (!displayContainer) {
+            // console.warn("Elemen 'keranjangNamaPembeli' tidak ditemukan.");
+            return; // Keamanan jika HTML keranjang salah
+        }
+        
+        // 6. Ambil <span> di dalamnya
+        const displayText = displayContainer.querySelector('span');
+        if (!displayText) {
+            console.error("Elemen <span> di dalam 'keranjangNamaPembeli' tidak ditemukan.");
+            return;
+        }
 
-        // 6. Update teksnya
+        // 7. Update teksnya
         displayText.textContent = displayTextContent;
         
-        // 7. Tampilkan/sembunyikan kontainer berdasarkan apakah ada item di keranjang
+        // 8. (Opsional) Atur style italic/normal
+        if (namaPembeli) {
+            // Jika ada nama, buat tebal dan hapus italic
+            displayText.classList.remove('italic', 'text-slate-500', 'dark:text-slate-400');
+            displayText.classList.add('font-semibold', 'text-slate-700', 'dark:text-slate-300');
+        } else {
+            // Jika 'Umum', kembalikan ke style default
+            displayText.classList.add('italic', 'text-slate-500', 'dark:text-slate-400');
+            displayText.classList.remove('font-semibold', 'text-slate-700', 'dark:text-slate-300');
+        }
+
+        // 9. Tampilkan/sembunyikan kontainer (seluruh <p> tag)
         if (keranjang.length > 0) {
             displayContainer.classList.remove('hidden');
         } else {
             displayContainer.classList.add('hidden');
         }
     }
+    
     /**
  * Merender tabel keranjang dari state `keranjang`
  * (Termasuk update untuk menampilkan nama pembeli)
@@ -1917,6 +1940,7 @@ function renderKeranjang() {
   </script>
 </body>
 </html>
+
 
 
 
