@@ -451,8 +451,15 @@
 
       <!-- ===== KERANJANG BELANJA ===== -->
       <div id="keranjangContainer" class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg mb-6 hidden">
-        <h3 class="font-semibold text-lg mb-4">Keranjang Belanja</h3>
-        <div class="overflow-x-auto mb-4">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+       <h3 class="font-semibold text-lg">Keranjang Belanja</h3>
+                     <p id="keranjangNamaPembeli" class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                    Pembeli: <span class="font-medium text-slate-500 dark:text-slate-400 italic">Umum</span>
+                </p>
+            </div>
+        </div>
+     <div class="overflow-x-auto mb-4">
           <table class="min-w-full text-sm">
             <thead class="bg-slate-100 dark:bg-slate-700">
               <tr>
@@ -526,15 +533,15 @@
         </div>
         <div class="overflow-x-auto">           <table class="min-w-full text-sm">
             <thead class="bg-slate-100 dark:bg-slate-700">
-    <tr>
-        <th class="p-3 text-left font-semibold">Tanggal</th>
-        <th class="p-3 text-left font-semibold">Produk</th>
-        <th class="p-3 text-left font-semibold">Pembeli</th> <th class="p-3 text-left font-semibold">Qty</th>
-        <th class="p-3 text-left font-semibold">Total</th>
-        <th class="p-3 text-left font-semibold">Keuntungan</th>
-        <th class="p-3 text-left font-semibold">Aksi</th>
-    </tr>
-</thead>
+            <tr>
+                <th class="p-3 text-left font-semibold">Tanggal</th>
+                <th class="p-3 text-left font-semibold">Produk</th>
+                <th class="p-3 text-left font-semibold">Pembeli</th> <th class="p-3 text-left font-semibold">Qty</th>
+                <th class="p-3 text-left font-semibold">Total</th>
+                <th class="p-3 text-left font-semibold">Keuntungan</th>
+                <th class="p-3 text-left font-semibold">Aksi</th>
+            </tr>
+        </thead>
             <tbody id="laporanTable" class="divide-y dark:divide-slate-700">
               <!-- Konten diisi JS -->
             </tbody>
@@ -767,6 +774,7 @@
       document.getElementById('kasirClear').addEventListener('click', () => formKasir.reset());
       document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
       document.getElementById('laporanFilterBtn').addEventListener('click', loadLaporan); // Filter laporan
+      document.getElementById('kasirNamaPembeli').addEventListener('input', updateKeranjangPembeliDisplay);
       
       // Wire modal buttons
       document.getElementById('closeModalBtn').addEventListener('click', () => closeReceiptModal(true)); // Ttp struk & refresh
@@ -1253,6 +1261,26 @@ button.type = 'button';
       }
     };
 
+/**
+     * [BARU] Helper function untuk update tampilan nama pembeli di keranjang
+     * Ini dipanggil saat mengetik di input nama atau saat item ditambah/dihapus
+     */
+    function updateKeranjangPembeliDisplay() {
+        const namaPembeli = document.getElementById('kasirNamaPembeli').value.trim();
+        const displayContainer = document.getElementById('displayKeranjangPembeli');
+        const displayText = document.getElementById('displayNamaPembeliText');
+        
+        if (!displayContainer || !displayText) return; // Safety check
+
+        // Tampilkan hanya jika ada nama DAN ada item di keranjang
+        if (namaPembeli && keranjang.length > 0) {
+            displayText.textContent = namaPembeli;
+            displayContainer.classList.remove('hidden');
+        } else {
+            displayContainer.classList.add('hidden');
+        }
+    }
+
 // ===========================
     //  KASIR (POS)
     // ===========================
@@ -1436,33 +1464,43 @@ button.type = 'button';
      * Merender tabel keranjang dari state `keranjang`
      */
     function renderKeranjang() {
-        if (keranjang.length === 0) {
-            keranjangContainer.classList.add('hidden');
-            return;
-        }
-
-        let total = 0;
-        keranjangTable.innerHTML = keranjang.map((item, index) => {
-            const subtotal = item.harga_jual * item.qty;
-            total += subtotal;
-            return `
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                    <td class="p-3">${escapeHtml(item.nama)}</td>
-                    <td class="p-3">${formatRupiah(item.harga_jual)}</td>
-                    <td class="p-3">${item.qty}</td>
-                    <td class="p-3 font-medium">${formatRupiah(subtotal)}</td>
-                    <td class="p-3">
-                        <button class="text-red-500 hover:text-red-700" onclick="handleHapusKeranjangItem(${index})">
-                            <i class="fa-solid fa-trash"></i> Hapus
-                        </button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-
-        keranjangTotal.textContent = formatRupiah(total);
-        keranjangContainer.classList.remove('hidden');
+    // Cek jika keranjang kosong
+    if (keranjang.length === 0) {
+        keranjangContainer.classList.add('hidden');
+        
+        // Panggil update display untuk menyembunyikan nama juga
+        updateKeranjangPembeliDisplay(); 
+        return;
     }
+
+    let total = 0;
+    keranjangTable.innerHTML = keranjang.map((item, index) => {
+        const subtotal = item.harga_jual * item.qty;
+        total += subtotal;
+        return `
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                <td class="p-3">${escapeHtml(item.nama)}</td>
+                <td class="p-3">${formatRupiah(item.harga_jual)}</td>
+                <td class="p-3">${item.qty}</td>
+                <td class="p-3 font-medium">${formatRupiah(subtotal)}</td>
+                <td class="p-3">
+                    <button class="text-red-500 hover:text-red-700" onclick="handleHapusKeranjangItem(${index})">
+                        <i class="fa-solid fa-trash"></i> Hapus
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    // Update total
+    keranjangTotal.textContent = formatRupiah(total);
+    // Tampilkan container keranjang
+    keranjangContainer.classList.remove('hidden');
+
+    // Panggil helper function di akhir render
+    // Ini akan menampilkan nama jika inputnya terisi
+    updateKeranjangPembeliDisplay();
+}
 
     /**
      * Menghapus item dari keranjang berdasarkan index-nya
@@ -1477,6 +1515,7 @@ button.type = 'button';
      */
     function handleClearKeranjang() {
         keranjang = [];
+        document.getElementById('kasirNamaPembeli').value = '';
         renderKeranjang();
     }
 
@@ -1829,5 +1868,16 @@ button.type = 'button';
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
 
 
