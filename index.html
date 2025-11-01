@@ -773,6 +773,8 @@
       const kasirNamaInput = document.getElementById('kasirNamaPembeli');
         if (kasirNamaInput) {
             kasirNamaInput.addEventListener('input', updateKeranjangPembeliDisplay);
+        } else {
+            console.error("Input 'kasirNamaPembeli' tidak ditemukan.");
         }
       
       // Wire clear buttons
@@ -1900,6 +1902,7 @@ function renderKeranjang() {
   </script>
 </body>
 </html>
+
 
 
 
