@@ -428,22 +428,23 @@
     <!-- ===== PAGE: KASIR ===== -->
     <section id="kasir" class="page">
       <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg mb-6">
-        <h2 class="text-xl font-semibold mb-4">Kasir (Point of Sale)</h2>
-        <form id="formKasir" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <select id="kasirProduk" class="md:col-span-2 border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-            <option value="">-- Pilih Produk --</option>
-          </select>
-          <input id="kasirQty" type="number" min="1" value="1" class="border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-          <div class="col-span-1 md:col-span-1 flex gap-2">
-            <button class="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2">
-              <i class="fa-solid fa-cart-plus"></i> Tambah
-            </button>
-            <button id="kasirClear" type="button" class="bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-800 dark:text-white px-4 py-3 rounded-lg font-medium hover:bg-slate-400 transition-all duration-200">
-              <i class="fa-solid fa-times"></i>
-            </button>
-          </div>
-        </form>
-      </div>
+        <h2 class="text-xl font-semibold mb-4">Kasir (Point of Sale)</h2>
+        <form id="formKasir" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <select id="kasirProduk" class="md:col-span-2 border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <option value="">-- Pilih Produk --</option>
+          </select>
+          <input id="kasirQty" type="number" min="1" value="1" class="border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+          <input id="kasirPembeli" type="text" placeholder="Nama Pembeli" class="md:col-span-2 border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <div class="col-span-1 md:col-span-2 flex gap-2">
+            <button class="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-cart-plus"></i> Tambah
+            </button>
+            <button id="kasirClear" type="button" class="bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-800 dark:text-white px-4 py-3 rounded-lg font-medium hover:bg-slate-400 transition-all duration-200">
+              <i class="fa-solid fa-times"></i>
+            </button>
+          </div>
+        </form>
+      </div>
 
       <!-- ===== KERANJANG BELANJA ===== -->
       <div id="keranjangContainer" class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg mb-6 hidden">
@@ -489,6 +490,7 @@
                 <th class="p-3 text-left font-semibold">Produk</th>
                 <th class="p-3 text-left font-semibold">Qty</th>
                 <th class="p-3 text-left font-semibold">Total</th>
+                <th class="p-3 text-left font-semibold">Pembeli</th>
                 <th class="p-3 text-left font-semibold">Waktu</th>
                 <th class="p-3 text-left font-semibold">Aksi</th>
               </tr>
@@ -587,6 +589,9 @@
     
     // Kasir Form Elements
     const kasirQtyEl = document.getElementById('kasirQty');
+    
+    // Baris BARU: Tambahkan ini
+    const kasirPembeliEl = document.getElementById('kasirPembeli');
 
     // Receipt Modal Elements
     const receiptModal = document.getElementById('receiptModal');
@@ -1304,7 +1309,7 @@ button.type = 'button';
       try {
         const { data, error } = await supabase
           .from('transaksi')
-          .select('id, produk_id, qty, total, created_at, keuntungan, produk:produk_id(nama, harga_jual, modal), nota_id') // Tambah nota_id
+          .select('id, produk_id, qty, total, created_at, keuntungan, produk:produk_id(nama, harga_jual, modal), nota_id, nama_pembeli')
           .order('created_at', { ascending: false })
           .limit(100); // Ambil lebih banyak untuk grouping
         if (error) throw error;
@@ -1321,6 +1326,7 @@ button.type = 'button';
                     total: 0,
                     qty: 0,
                     created_at: t.created_at
+                    nama_pembeli: t.nama_pembeli
                 };
             }
             
@@ -1357,6 +1363,7 @@ button.type = 'button';
               <td class="p-3">${productNames}</td>
               <td class="p-3">${nota.qty}</td>
               <td class="p-3 font-medium">${formatRupiah(nota.total)}</td>
+              <td class="p-3">${escapeHtml(nota.nama_pembeli || '-')}</td>
               <td class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(nota.created_at)}</td>
               <td class="p-3">
                 <button class="bg-sky-500 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-sky-600 transition-all" onclick='reprintReceipt(${JSON.stringify(reprintData)}, "${nota.created_at}")'>
@@ -1476,7 +1483,9 @@ button.type = 'button';
      */
     async function handleProsesKeranjang() {
         if (keranjang.length === 0) return alert('Keranjang kosong!');
-
+      
+      // BARIS BARU: Ambil nama pembeli
+        const namaPembeli = kasirPembeliEl.value.trim() || 'Umum';
         showLoading('Memproses keranjang...');
         try {
             // 1. Validasi stok terbaru dari DB
@@ -1534,7 +1543,8 @@ button.type = 'button';
                         qty: item.qty,
                         total: total,
                         keuntungan: keuntungan,
-                        nota_id: notaId // <-- TAMBAHKAN NOTA ID
+                        nota_id: notaId, // <-- TAMBAHKAN NOTA ID
+                        nama_pembeli: namaPembeli
                     }),
                     supabase.from('produk').update({ stok: newStok }).eq('id', item.produk_id)
                 ]);
@@ -1543,6 +1553,7 @@ button.type = 'button';
             await Promise.all(prosesPromises);
 
             // 3. Sukses
+            kasirPembeliEl.value = '';
             lastProcessedCart = [...itemsToProcess]; // Simpan data utk struk
             handleClearKeranjang(); // Kosongkan keranjang di UI
             hideLoading();
@@ -1805,6 +1816,7 @@ button.type = 'button';
   </script>
 </body>
 </html>
+
 
 
 
