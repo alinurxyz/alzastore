@@ -1536,29 +1536,22 @@ function renderKeranjang() {
         renderKeranjang();
     }
 
-    /**
+    /*
      * Memproses semua item di keranjang ke database
-     */
-    /**
-     * Memproses semua item di keranjang ke database
-     */
-    /**
-     * Memproses semua item di keranjang ke database
-     * (Versi perbaikan untuk memastikan 'nama_pembeli' terkirim)
-     */
-    /**
-     * Memproses semua item di keranjang ke database
-     * (Versi perbaikan untuk TES HARD-CODE)
+     * (Versi final setelah tes debug)
      */
     async function handleProsesKeranjang() {
         if (keranjang.length === 0) return alert('Keranjang kosong!');
 
-        // [ --- BAGIAN TES --- ]
-        // Kita tidak akan membaca dari HTML. Kita akan memaksa nilainya.
-        // const namaPembeli = document.getElementById('kasirNamaPembeli').value.trim() || null; 
-        const namaPembeli = "TES DEBUG 123"; // <-- KITA PAKSA NILAINYA DI SINI
-        // [ --- AKHIR BAGIAN TES --- ]
-
+        // [KODE DIKEMBALIKAN]
+        // Ini sekarang akan membaca dari input HTML yang sudah Anda perbaiki
+        const namaPembeliInput = document.getElementById('kasirNamaPembeli');
+        
+        if (!namaPembeliInput) {
+            alert("Error Kritis: Input 'kasirNamaPembeli' tidak ditemukan. Cek ID HTML Anda.");
+            return;
+        }
+        const namaPembeli = namaPembeliInput.value.trim() || null; 
 
         showLoading('Memproses keranjang...');
         try {
@@ -1601,20 +1594,19 @@ function renderKeranjang() {
                 return;
             }
 
-            // 2. Proses Transaksi (Insert ke 'transaksi' dan Update 'produk')
+            // 2. Proses Transaksi
             const prosesPromises = itemsToProcess.map(item => {
                 const total = (item.harga_jual || 0) * item.qty;
                 const keuntungan = (item.harga_jual - item.modal) * item.qty;
                 const newStok = item.stok_terbaru - item.qty;
                 
-                // Siapkan data untuk dikirim
                 const dataToInsert = { 
                     produk_id: item.produk_id, 
                     qty: item.qty,
                     total: total,
                     keuntungan: keuntungan,
                     nota_id: notaId, 
-                    nama_pembeli: namaPembeli // Ini akan mengirim "TES DEBUG 123"
+                    nama_pembeli: namaPembeli // Ini akan mengambil nilai dari input
                 };
 
                 return Promise.all([
@@ -1637,7 +1629,6 @@ function renderKeranjang() {
             hideLoading();
         }
     }
-
 
     // ===========================
     //  LAPORAN
@@ -1896,6 +1887,7 @@ function renderKeranjang() {
   </script>
 </body>
 </html>
+
 
 
 
