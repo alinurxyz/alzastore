@@ -429,20 +429,24 @@
     <section id="kasir" class="page">
       <div class="bg-white dark:bg-slate-800 p-4 md:p-6 rounded-xl shadow-lg mb-6">
         <h2 class="text-xl font-semibold mb-4">Kasir (Point of Sale)</h2>
-        <form id="formKasir" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <select id="kasirProduk" class="md:col-span-2 border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-            <option value="">-- Pilih Produk --</option>
-          </select>
-          <input id="kasirQty" type="number" min="1" value="1" class="border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-          <div class="col-span-1 md:col-span-1 flex gap-2">
-            <button class="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2">
-              <i class="fa-solid fa-cart-plus"></i> Tambah
-            </button>
-            <button id="kasirClear" type="button" class="bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-800 dark:text-white px-4 py-3 rounded-lg font-medium hover:bg-slate-400 transition-all duration-200">
-              <i class="fa-solid fa-times"></i>
-            </button>
-          </div>
-        </form>
+        <form id="formKasir" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <select id="kasirProduk" class="md:col-span-2 border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+        <option value="">-- Pilih Produk --</option>
+    </select>
+    
+    <input id="kasirNamaPembeli" placeholder="Nama Pembeli (Opsional)" class="md:col-span-1 border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+    
+    <input id="kasirQty" type="number" min="1" value="1" class="md:col-span-1 border p-3 rounded-lg bg-slate-50 dark:bg-slate-700 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+    
+    <div class="col-span-1 md:col-span-1 flex gap-2">
+        <button class="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-all duration-200 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-cart-plus"></i> Tambah
+        </button>
+        <button id="kasirClear" type="button" class="bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-800 dark:text-white px-4 py-3 rounded-lg font-medium hover:bg-slate-400 transition-all duration-200">
+            <i class="fa-solid fa-times"></i>
+        </button>
+    </div>
+</form>
       </div>
 
       <!-- ===== KERANJANG BELANJA ===== -->
@@ -485,14 +489,14 @@
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead class="bg-slate-100 dark:bg-slate-700">
-              <tr>
-                <th class="p-3 text-left font-semibold">Produk</th>
-                <th class="p-3 text-left font-semibold">Qty</th>
-                <th class="p-3 text-left font-semibold">Total</th>
-                <th class="p-3 text-left font-semibold">Waktu</th>
-                <th class="p-3 text-left font-semibold">Aksi</th>
-              </tr>
-            </thead>
+    <tr>
+        <th class="p-3 text-left font-semibold">Produk</th>
+        <th class="p-3 text-left font-semibold">Pembeli</th> <th class="p-3 text-left font-semibold">Qty</th>
+        <th class="p-3 text-left font-semibold">Total</th>
+        <th class="p-3 text-left font-semibold">Waktu</th>
+        <th class="p-3 text-left font-semibold">Aksi</th>
+    </tr>
+</thead>
             <tbody id="kasirTable" class="divide-y dark:divide-slate-700">
               <!-- Konten diisi JS -->
             </tbody>
@@ -522,15 +526,15 @@
         </div>
         <div class="overflow-x-auto">           <table class="min-w-full text-sm">
             <thead class="bg-slate-100 dark:bg-slate-700">
-              <tr>
-                <th class="p-3 text-left font-semibold">Tanggal</th>
-                <th class="p-3 text-left font-semibold">Produk</th>
-                <th class="p-3 text-left font-semibold">Qty</th>
-                <th class="p-3 text-left font-semibold">Total</th>
-                <th class="p-3 text-left font-semibold">Keuntungan</th>
-                <th class="p-3 text-left font-semibold">Aksi</th> <!-- Kolom Aksi Baru -->
-              </tr>
-            </thead>
+    <tr>
+        <th class="p-3 text-left font-semibold">Tanggal</th>
+        <th class="p-3 text-left font-semibold">Produk</th>
+        <th class="p-3 text-left font-semibold">Pembeli</th> <th class="p-3 text-left font-semibold">Qty</th>
+        <th class="p-3 text-left font-semibold">Total</th>
+        <th class="p-3 text-left font-semibold">Keuntungan</th>
+        <th class="p-3 text-left font-semibold">Aksi</th>
+    </tr>
+</thead>
             <tbody id="laporanTable" class="divide-y dark:divide-slate-700">
               <!-- Konten diisi JS -->
             </tbody>
@@ -1301,74 +1305,79 @@ button.type = 'button';
     //  KASIR (POS)
     // ===========================
     async function loadKasirHistory() {
-      try {
-        const { data, error } = await supabase
-          .from('transaksi')
-          .select('id, produk_id, qty, total, created_at, keuntungan, produk:produk_id(nama, harga_jual, modal), nota_id') // Tambah nota_id
-          .order('created_at', { ascending: false })
-          .limit(100); // Ambil lebih banyak untuk grouping
-        if (error) throw error;
-        
-        // --- LOGIKA GROUPING BARU ---
-        const groupedByNota = (data || []).reduce((acc, t) => {
-            // Gunakan nota_id. Jika tidak ada (data lama), gunakan created_at sebagai ID unik
-            const notaId = t.nota_id || t.created_at; 
+        try {
+            const { data, error } = await supabase
+            .from('transaksi')
+            // [DIUBAH] Tambahkan nama_pembeli
+            .select('id, produk_id, qty, total, created_at, keuntungan, produk:produk_id(nama, harga_jual, modal), nota_id, nama_pembeli')
+            .order('created_at', { ascending: false })
+            .limit(100); 
+            if (error) throw error;
             
-            if (!acc[notaId]) {
-                acc[notaId] = {
-                    nota_id: notaId,
-                    items: [],
-                    total: 0,
-                    qty: 0,
-                    created_at: t.created_at
-                };
-            }
+            const groupedByNota = (data || []).reduce((acc, t) => {
+                const notaId = t.nota_id || t.created_at; 
+                
+                if (!acc[notaId]) {
+                    acc[notaId] = {
+                        nota_id: notaId,
+                        items: [],
+                        total: 0,
+                        qty: 0,
+                        created_at: t.created_at,
+                        // [BARU] Ambil nama pembeli (asumsi sama untuk 1 nota)
+                        nama_pembeli: t.nama_pembeli 
+                    };
+                }
+                
+                acc[notaId].items.push(t);
+                acc[notaId].total += Number(t.total || 0);
+                acc[notaId].qty += Number(t.qty || 0);
+                
+                return acc;
+            }, {});
             
-            acc[notaId].items.push(t);
-            acc[notaId].total += Number(t.total || 0);
-            acc[notaId].qty += Number(t.qty || 0);
-            
-            return acc;
-        }, {});
-        
-        // Ubah objek hasil group menjadi array dan urutkan
-        const sortedNotas = Object.values(groupedByNota)
-            .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+            const sortedNotas = Object.values(groupedByNota)
+                .sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
 
-        kasirTable.innerHTML = sortedNotas.slice(0, 20).map(nota => { // Tampilkan 20 nota terbaru
-          
-          // Data untuk reprint (sekarang array)
-          const reprintData = nota.items.map(t => ({
-              nama: t.produk?.nama || 'Produk Dihapus',
-              qty: t.qty,
-              total: t.total,
-              harga_satuan: t.produk?.harga_jual || (t.total / t.qty),
-              tanggal: t.created_at
-          }));
-          
-          // Tampilkan nama produk
-          const productNames = nota.items.map(t => {
-              const name = t.produk?.nama || 'Produk Dihapus';
-              return `<span class="block text-xs">${escapeHtml(name)} (${t.qty}x)</span>`;
-          }).join('');
+            kasirTable.innerHTML = sortedNotas.slice(0, 20).map(nota => { 
+                
+                const reprintData = nota.items.map(t => ({
+                    nama: t.produk?.nama || 'Produk Dihapus',
+                    qty: t.qty,
+                    total: t.total,
+                    harga_satuan: t.produk?.harga_jual || (t.total / t.qty),
+                    tanggal: t.created_at
+                }));
+                
+                const productNames = nota.items.map(t => {
+                    const name = t.produk?.nama || 'Produk Dihapus';
+                    return `<span class="block text-xs">${escapeHtml(name)} (${t.qty}x)</span>`;
+                }).join('');
 
-          return `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200 align-top">
-              <td class="p-3">${productNames}</td>
-              <td class="p-3">${nota.qty}</td>
-              <td class="p-3 font-medium">${formatRupiah(nota.total)}</td>
-              <td class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(nota.created_at)}</td>
-              <td class="p-3">
-                <button class="bg-sky-500 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-sky-600 transition-all" onclick='reprintReceipt(${JSON.stringify(reprintData)}, "${nota.created_at}")'>
-                  <i class="fa-solid fa-receipt"></i> Struk
-                </button>
-              </td>
-            </tr>`;
-        }).join('');
-      } catch (err) {
-        console.error('loadKasirHistory err', err);
-        kasirTable.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-red-500">Gagal memuat riwayat kasir.</td></tr>`;
-      }
+                // [BARU] Siapkan nama pembeli
+                const pembeliHtml = nota.nama_pembeli 
+                    ? escapeHtml(nota.nama_pembeli) 
+                    : '<span class="text-slate-400 italic text-xs">N/A</span>';
+
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200 align-top">
+                        <td class="p-3">${productNames}</td>
+                        <td class="p-3 text-sm font-medium">${pembeliHtml}</td> 
+                        <td class="p-3">${nota.qty}</td>
+                        <td class="p-3 font-medium">${formatRupiah(nota.total)}</td>
+                        <td class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(nota.created_at)}</td>
+                        <td class="p-3">
+                            <button class="bg-sky-500 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-sky-600 transition-all" onclick='reprintReceipt(${JSON.stringify(reprintData)}, "${nota.created_at}")'>
+                                <i class="fa-solid fa-receipt"></i> Struk
+                            </button>
+                        </td>
+                    </tr>`;
+            }).join('');
+        } catch (err) {
+            console.error('loadKasirHistory err', err);
+            // [DIUBAH] colspan disesuaikan menjadi 6
+            kasirTable.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-red-500">Gagal memuat riwayat kasir.</td></tr>`;
+        }
     }
 
     async function handleKasirSubmit(ev) {
@@ -1474,8 +1483,14 @@ button.type = 'button';
     /**
      * Memproses semua item di keranjang ke database
      */
+    /**
+     * Memproses semua item di keranjang ke database
+     */
     async function handleProsesKeranjang() {
         if (keranjang.length === 0) return alert('Keranjang kosong!');
+
+        // [BARU] Ambil nama pembeli dari form
+        const namaPembeli = document.getElementById('kasirNamaPembeli').value.trim() || null; // null jika kosong
 
         showLoading('Memproses keranjang...');
         try {
@@ -1516,7 +1531,6 @@ button.type = 'button';
             if (errorMsg) {
                 hideLoading();
                 alert('Gagal proses keranjang:\n' + errorMsg);
-                // (Opsional) Refresh data stok di cache agar user lihat stok terbaru
                 await loadStok(); 
                 return;
             }
@@ -1534,7 +1548,8 @@ button.type = 'button';
                         qty: item.qty,
                         total: total,
                         keuntungan: keuntungan,
-                        nota_id: notaId // <-- TAMBAHKAN NOTA ID
+                        nota_id: notaId, 
+                        nama_pembeli: namaPembeli // <-- [BARU] Simpan nama pembeli
                     }),
                     supabase.from('produk').update({ stok: newStok }).eq('id', item.produk_id)
                 ]);
@@ -1543,10 +1558,14 @@ button.type = 'button';
             await Promise.all(prosesPromises);
 
             // 3. Sukses
-            lastProcessedCart = [...itemsToProcess]; // Simpan data utk struk
-            handleClearKeranjang(); // Kosongkan keranjang di UI
+            lastProcessedCart = [...itemsToProcess]; 
+            handleClearKeranjang(); 
+            
+            // [BARU] Kosongkan juga nama pembeli di form
+            document.getElementById('kasirNamaPembeli').value = '';
+
             hideLoading();
-            showConfirmModal(); // Tampilkan modal konfirmasi
+            showConfirmModal(); 
 
         } catch (err) {
             console.error('handleProsesKeranjang err', err);
@@ -1560,52 +1579,57 @@ button.type = 'button';
     //  LAPORAN
     // ===========================
     async function loadLaporan() {
-      try {
-        const tglMulai = document.getElementById('laporanTglMulai').value;
-        const tglSelesai = document.getElementById('laporanTglSelesai').value;
+        try {
+            const tglMulai = document.getElementById('laporanTglMulai').value;
+            const tglSelesai = document.getElementById('laporanTglSelesai').value;
 
-        let query = supabase
-          .from('transaksi')
-          .select('id, produk_id, qty, total, keuntungan, created_at, produk:produk_id(nama)');
-          
-// Terapkan filter tanggal jika ada
-        if (tglMulai) {
-            // PERBAIKAN: Tambahkan 'T00:00:00' untuk memastikannya dibaca sebagai LOKAL
-            query = query.gte('created_at', new Date(tglMulai + 'T00:00:00').toISOString());
-        }
-        if (tglSelesai) {
-            // Tambahkan T23:59:59 agar mencakup seluruh hari (Ini sudah benar)
-            query = query.lte('created_at', new Date(tglSelesai + 'T23:59:59').toISOString());
-        }
+            let query = supabase
+            .from('transaksi')
+            // [DIUBAH] Tambahkan nama_pembeli
+            .select('id, produk_id, qty, total, keuntungan, created_at, nama_pembeli, produk:produk_id(nama)');
+            
+            if (tglMulai) {
+                query = query.gte('created_at', new Date(tglMulai + 'T00:00:00').toISOString());
+            }
+            if (tglSelesai) {
+                query = query.lte('created_at', new Date(tglSelesai + 'T23:59:59').toISOString());
+            }
 
-        const { data, error } = await query
-          .order('created_at', { ascending: false })
-          .limit(200); // Batasi 200 untuk tampilan
-          
-        if (error) throw error;
-        
-        globalLaporanCache = data || []; // Simpan di cache untuk ekspor
-        
-        laporanTable.innerHTML = globalLaporanCache.map(t => {
-          const name = t.produk?.nama || 'Produk Dihapus';
-          return `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
-              <td data-label="Tanggal" class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(t.created_at)}</td>
-              <td data-label="Produk" class="p-3">${escapeHtml(name)}</td>
-              <td data-label="Qty" class="p-3">${t.qty}</td>
-              <td data-label="Total" class="p-3 font-medium">${formatRupiah(t.total)}</td>
-              <td data-label="Keuntungan" class="p-3 font-medium text-green-600 dark:text-green-400">${formatRupiah(t.keuntungan)}</td>
-              <td data-label="Aksi" class="p-3">
-                  <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-red-700 transition-all" onclick="hapusLaporan(${t.id})">
-                      <i class="fa-solid fa-trash"></i> Hapus
-                  </button>
-              </td>
-            </tr>`;
-        }).join('');
-      } catch (err) {
-        console.error('loadLaporan err', err);
-        laporanTable.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-red-500">Gagal memuat data laporan.</td></tr>`;
-      }
+            const { data, error } = await query
+            .order('created_at', { ascending: false })
+            .limit(200); 
+            
+            if (error) throw error;
+            
+            globalLaporanCache = data || []; 
+            
+            laporanTable.innerHTML = globalLaporanCache.map(t => {
+                const name = t.produk?.nama || 'Produk Dihapus';
+                // [BARU] Siapkan nama pembeli
+                const pembeliHtml = t.nama_pembeli 
+                        ? escapeHtml(t.nama_pembeli) 
+                        : '<span class="text-slate-400 italic text-xs">N/A</span>';
+                        
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors duration-200">
+                        <td data-label="Tanggal" class="p-3 text-slate-500 dark:text-slate-400 text-xs">${formatTanggal(t.created_at)}</td>
+                        <td data-label="Produk" class="p-3">${escapeHtml(name)}</td>
+                        <td data-label="Pembeli" class="p-3">${pembeliHtml}</td>
+                        <td data-label="Qty" class="p-3">${t.qty}</td>
+                        <td data-label="Total" class="p-3 font-medium">${formatRupiah(t.total)}</td>
+                        <td data-label="Keuntungan" class="p-3 font-medium text-green-600 dark:text-green-400">${formatRupiah(t.keuntungan)}</td>
+                        <td data-label="Aksi" class="p-3">
+                            <button class="bg-red-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-red-700 transition-all" onclick="hapusLaporan(${t.id})">
+                                <i class="fa-solid fa-trash"></i> Hapus
+                            </button>
+                        </td>
+                    </tr>`;
+            }).join('');
+        } catch (err) {
+            console.error('loadLaporan err', err);
+            // [DIUBAH] colspan disesuaikan menjadi 7
+            laporanTable.innerHTML = `<tr><td colspan="7" class="p-3 text-center text-red-500">Gagal memuat data laporan.</td></tr>`;
+        }
     }
     
     // Fungsi baru untuk hapus laporan
@@ -1757,8 +1781,6 @@ button.type = 'button';
     async function exportToExcel() {
         showLoading('Mempersiapkan data Excel...');
         try {
-            // Ambil data terbaru (bisa dari cache jika dirasa cukup, atau fetch ulang)
-            // Kita gunakan cache `globalLaporanCache`
             if (globalLaporanCache.length === 0) {
                 alert('Data laporan kosong, tidak ada yang diekspor.');
                 return;
@@ -1769,6 +1791,7 @@ button.type = 'button';
                 return {
                     "Tanggal": formatTanggal(t.created_at),
                     "Nama Produk": t.produk?.nama || 'Produk Dihapus',
+                    "Nama Pembeli": t.nama_pembeli || '', // <-- [BARU] Tambah kolom
                     "Qty": t.qty,
                     "Total Penjualan": t.total,
                     "Keuntungan": t.keuntungan
@@ -1782,6 +1805,7 @@ button.type = 'button';
             ws['!cols'] = [
                 { wch: 20 }, // Tanggal
                 { wch: 30 }, // Nama Produk
+                { wch: 20 }, // Nama Pembeli <-- [BARU]
                 { wch: 10 }, // Qty
                 { wch: 20 }, // Total Penjualan
                 { wch: 20 }  // Keuntungan
@@ -1805,6 +1829,5 @@ button.type = 'button';
   </script>
 </body>
 </html>
-
 
 
